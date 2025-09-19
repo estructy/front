@@ -5,30 +5,18 @@
 	import { Separator } from '$lib/components/ui/separator';
 	import * as Select from '$lib/components/ui/select';
 	import { onMount } from 'svelte';
-	import { superForm, type SuperValidated } from 'sveltekit-superforms';
+	import { superForm } from 'sveltekit-superforms';
 	import { zod4Client as zodClient } from 'sveltekit-superforms/adapters';
-	import { createCategorySchema, type CreateCategorySchema } from './schema.js';
+	import { createCategorySchema } from './schema.js';
 	import * as Form from '$lib/components/ui/form/index.js';
-	import type { Infer } from 'zod';
-	import type { Categories } from '@/api/@types/categories.js';
 
-	let {
-		data,
-		form: resultForm
-	}: {
-		data: {
-			form: SuperValidated<Infer<CreateCategorySchema>>;
-			categories: Categories[];
-		};
-		form: {
-			error: string;
-		};
-	} = $props();
+	let { data } = $props();
 
 	let submitText = $state('Create Category');
 
 	const form = superForm(data.form, {
 		validators: zodClient(createCategorySchema),
+		validationMethod: 'onsubmit',
 		onSubmit: () => {
 			submitText = 'Creating...';
 		},
@@ -36,10 +24,12 @@
 			switch (event.result.type) {
 				case 'success':
 					if (redirectValue) {
-						goto(`/app/${redirectValue}`);
-					} else {
-						goto('/app');
+						await goto(`/app/${redirectValue}`);
 					}
+					submitText = 'Created!';
+					setTimeout(() => {
+						submitText = 'Create Category';
+					}, 2000);
 					break;
 				case 'failure':
 					submitText = 'Try Again';
@@ -47,17 +37,15 @@
 			}
 		}
 	});
-	const { form: formData, enhance, submitting } = form;
+	const { form: formData, enhance, submitting, message } = form;
 
 	let redirectValue = $state('');
 	let filterdCategories = $derived(data.categories.filter((c) => c.type === $formData.type));
-
-	const triggerContent = $derived(
+	let triggerContent = $derived(
 		data.categories.find((c) => c.category_code === $formData.parent_code)?.name ||
 			'Select a parent category'
 	);
-
-	const typeTriggerContent = $derived($formData.type === 'expense' ? 'Expense' : 'Income');
+	let typeTriggerContent = $derived($formData.type === 'expense' ? 'Expense' : 'Income');
 
 	function handleGoBack() {
 		if (redirectValue) {
@@ -118,14 +106,14 @@
 				<Form.FieldErrors />
 			</Form.Field>
 
-			<Form.Field {form} name="type">
+			<Form.Field {form} name="parent_code">
 				<Form.Control>
 					{#snippet children({ props })}
 						<Form.Label>Parent Category <span class="text-red-500">*</span></Form.Label>
 						<Select.Root
 							{...props}
 							type="single"
-							name="parentCode"
+							name="parent_code"
 							bind:value={$formData.parent_code}
 						>
 							<Select.Trigger class="w-full">
@@ -148,8 +136,8 @@
 			</Form.Field>
 
 			<div class="mt-8 flex flex-wrap items-center justify-end gap-4">
-				{#if resultForm?.error}
-					<p class="text-sm text-red-600">{resultForm.error}</p>
+				{#if message}
+					<p class="text-sm text-red-600">{$message}</p>
 				{/if}
 
 				<Button
