@@ -57,8 +57,14 @@
 
 	onMount(() => {
 		let params = new URLSearchParams(window.location.search);
-		if (params.get('redirect')) {
+		if (
+			params.get('redirect') &&
+			!(params.get('redirect')?.startsWith('http') || params.get('redirect')?.startsWith('//'))
+		) {
 			redirectValue = params.get('redirect') || '';
+		}
+		if (params.get('type') === 'income' || params.get('type') === 'expense') {
+			$formData.type = params.get('type') as 'income' | 'expense';
 		}
 	});
 </script>
@@ -109,7 +115,7 @@
 			<Form.Field {form} name="parent_code">
 				<Form.Control>
 					{#snippet children({ props })}
-						<Form.Label>Parent Category <span class="text-red-500">*</span></Form.Label>
+						<Form.Label>Parent Category</Form.Label>
 						<Select.Root
 							{...props}
 							type="single"
