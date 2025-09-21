@@ -49,12 +49,7 @@
 		]
 	},
 	"dependencies": {
-		"@tiptap/core": "^3.4.4",
-		"@tiptap/extension-bubble-menu": "^3.4.4",
-		"@tiptap/extension-list": "^3.4.4",
-		"@tiptap/extension-text-style": "^3.4.4",
-		"@tiptap/pm": "^3.4.4",
-		"@tiptap/starter-kit": "^3.4.4",
+		"quill": "2.0.3",
 		"zod": "4.0.10"
 	}
 }

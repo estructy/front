@@ -1,7 +1,6 @@
 <script lang="ts">
 	import { Button, buttonVariants } from '$lib/components/ui/button';
 	import { Input } from '$lib/components/ui/input';
-	import { Label } from '$lib/components/ui/label';
 	import * as Select from '$lib/components/ui/select';
 	import SuperDebug, { superForm, type Infer, type SuperValidated } from 'sveltekit-superforms';
 	import { zod4Client as zodClient } from 'sveltekit-superforms/adapters';
@@ -22,7 +21,8 @@
 	} from '@internationalized/date';
 	import type { Categories } from '@/api/@types/categories';
 	import { onMount } from 'svelte';
-	import Tiptap from '@/components/tiptap/tiptap.svelte';
+	import Editor from '$lib/components/rte/rte.svelte';
+	import { goto } from '$app/navigation';
 
 	interface Props {
 		form: SuperValidated<Infer<CreateTransactionSchema>>;
@@ -54,7 +54,7 @@
 		}
 	});
 
-	const { form: formData, enhance, submitting } = formSettings;
+	const { form: formData, enhance, submitting, message } = formSettings;
 
 	let triggerContent = $derived(
 		categories.find((c) => c.category_code === $formData.category_code)
@@ -71,11 +71,13 @@
 	onMount(() => {
 		$formData.amount = '$0.00';
 	});
+
+	function handleGoBack() {
+		goto('/app');
+	}
 </script>
 
-<SuperDebug data={$formData} />
-
-<form method="POST" class="grid gap-4" use:enhance>
+<form method="POST" class="flex flex-col gap-4" use:enhance>
 	<Form.Field form={formSettings} name="date" class="flex flex-col">
 		<Form.Control>
 			{#snippet children({ props })}
@@ -189,7 +191,7 @@
 					? 'The category that best describes this expense.'
 					: 'The category that best describes this income.'}
 				<a
-					href="/app/categories/new?redirect=transactions/new"
+					href="/app/categories/new?redirect=transactions/new&type={type}"
 					class="text-indigo-600 hover:underline">Create new category</a
 				>
 			</Form.Description>
@@ -230,17 +232,36 @@
 		<Form.Control>
 			{#snippet children({ props })}
 				<Form.Label>Description</Form.Label>
-				<Tiptap bind:content={$formData.description} />
+				<Editor
+					{...props}
+					bind:content={$formData.description}
+					onChange={(value) => ($formData.description = value)}
+					placeholder={type === 'expense'
+						? 'Add any additional details about this expense...'
+						: 'Add any additional details about this income...'}
+				/>
 			{/snippet}
 		</Form.Control>
 		<Form.FieldErrors />
 	</Form.Field>
 
-	<div class="mt-8 flex justify-end">
+	<div class="mt-8 flex flex-wrap items-center justify-end gap-4">
+		{#if message}
+			<p class="text-sm text-red-600">{$message}</p>
+		{/if}
+
 		<Button
+			onclick={handleGoBack}
+			type="button"
+			class="bg-gray-200 text-gray-800 hover:bg-gray-300 focus-visible:outline-gray-400"
+			>Go Back</Button
+		>
+		<Form.Button
 			type="submit"
 			class="bg-indigo-600 hover:bg-indigo-500 focus-visible:outline-indigo-600"
-			disabled={$submitting}>{submitText}</Button
+			disabled={$submitting}
 		>
+			{submitText}
+		</Form.Button>
 	</div>
 </form>
