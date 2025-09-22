@@ -1,28 +1,32 @@
 <script lang="ts">
-	import { Button, buttonVariants } from '$lib/components/ui/button';
-	import { Input } from '$lib/components/ui/input';
-	import * as Select from '$lib/components/ui/select';
-	import SuperDebug, { superForm, type Infer, type SuperValidated } from 'sveltekit-superforms';
+	import SuperDebug, { superForm } from 'sveltekit-superforms';
 	import { zod4Client as zodClient } from 'sveltekit-superforms/adapters';
-	import { createTransactionSchema, type CreateTransactionSchema } from './schema';
-	import * as Form from '$lib/components/ui/form/index.js';
-	import { Calendar } from '$lib/components/ui/calendar/index.js';
-	import * as Popover from '$lib/components/ui/popover/index.js';
-	import { cn } from '$lib/utils.js';
 	import CircleAlert from '@lucide/svelte/icons/circle-alert';
 	import CalendarIcon from '@lucide/svelte/icons/calendar';
 	import {
 		CalendarDate,
 		DateFormatter,
-		type DateValue,
 		getLocalTimeZone,
 		parseDate,
 		today
 	} from '@internationalized/date';
-	import type { Categories } from '@/api/@types/categories';
-	import { onMount } from 'svelte';
-	import Editor from '$lib/components/rte/rte.svelte';
 	import { goto } from '$app/navigation';
+	import { onMount } from 'svelte';
+
+	import type { Infer, SuperValidated } from 'sveltekit-superforms';
+	import type { CreateTransactionSchema } from './schema';
+	import type { Categories } from '@/api/@types/categories';
+	import type { DateValue } from '@internationalized/date';
+
+	import { Button, buttonVariants } from '$lib/components/ui/button';
+	import Editor from '$lib/components/rte/rte.svelte';
+	import { Input } from '$lib/components/ui/input';
+	import * as Form from '$lib/components/ui/form/index.js';
+	import { Calendar } from '$lib/components/ui/calendar/index.js';
+	import { cn } from '$lib/utils.js';
+	import { createTransactionSchema } from './schema';
+	import * as Popover from '$lib/components/ui/popover/index.js';
+	import * as Select from '$lib/components/ui/select';
 
 	interface Props {
 		form: SuperValidated<Infer<CreateTransactionSchema>>;
@@ -33,6 +37,7 @@
 	let { form, type, categories }: Props = $props();
 
 	let submitText = $state('Create Transaction');
+	let clearFormContent = $state(false);
 	const formSettings = superForm(form, {
 		validators: zodClient(createTransactionSchema),
 		validationMethod: 'onsubmit',
@@ -42,6 +47,7 @@
 		onResult: async (event) => {
 			switch (event.result.type) {
 				case 'success':
+					clearFormContent = true;
 					submitText = 'Created!';
 					setTimeout(() => {
 						submitText = 'Create Transaction';
@@ -76,6 +82,8 @@
 		goto('/app');
 	}
 </script>
+
+<!--<SuperDebug data={formData} />-->
 
 <form method="POST" class="flex flex-col gap-4" use:enhance>
 	<Form.Field form={formSettings} name="date" class="flex flex-col">
@@ -235,7 +243,7 @@
 				<Editor
 					{...props}
 					bind:content={$formData.description}
-					onChange={(value) => ($formData.description = value)}
+					bind:clearContent={clearFormContent}
 					placeholder={type === 'expense'
 						? 'Add any additional details about this expense...'
 						: 'Add any additional details about this income...'}

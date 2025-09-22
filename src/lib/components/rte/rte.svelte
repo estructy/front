@@ -3,21 +3,29 @@
 	import 'quill/dist/quill.snow.css';
 	import './rte.css';
 	import type Quill from 'quill';
+	import { Skeleton } from '$lib/components/ui/skeleton/index.js';
 
 	interface Props {
 		content?: string;
 		placeholder?: string;
-		onChange?: (value: string) => void;
+		clearContent?: boolean;
 	}
 
-	const {
-		content = $bindable(''),
+	let {
+		content = $bindable(),
 		placeholder = 'Start typing...',
-		onChange = $bindable()
+		clearContent = $bindable()
 	}: Props = $props();
 
 	let editorElement = $state<HTMLDivElement | string>('');
 	let quill = $state<Quill>();
+
+	$effect(() => {
+		if (clearContent && quill) {
+			quill.root.innerHTML = '';
+			clearContent = false;
+		}
+	});
 
 	onMount(async () => {
 		const Quill = (await import('quill')).default;
@@ -36,15 +44,16 @@
 		});
 
 		// Set initial content
-		quill.root.innerHTML = content;
+		if (quill && content) {
+			quill.root.innerHTML = content;
+		}
 
 		// Listen for changes
 		quill.on('text-change', () => {
-			if (onChange && quill) {
-				onChange(quill.root.innerHTML);
-			}
+			content = quill?.root.innerHTML;
 		});
 	});
 </script>
 
+<Skeleton class="h-36 w-full" hidden={!!quill} />
 <div bind:this={editorElement}></div>
