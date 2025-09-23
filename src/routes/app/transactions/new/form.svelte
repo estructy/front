@@ -11,7 +11,7 @@
 		today
 	} from '@internationalized/date';
 	import { goto } from '$app/navigation';
-	import { onMount } from 'svelte';
+	import { onMount, setContext } from 'svelte';
 
 	import type { Infer, SuperValidated } from 'sveltekit-superforms';
 	import type { CreateTransactionSchema } from './schema';
@@ -27,18 +27,25 @@
 	import { createTransactionSchema } from './schema';
 	import * as Popover from '$lib/components/ui/popover/index.js';
 	import * as Select from '$lib/components/ui/select';
+	import {
+		loadNotificationsFromLocalStore,
+		notificationsCount,
+		saveNotificationsToLocalStore
+	} from '@/stores/notifications.svelte';
 
 	interface Props {
 		form: SuperValidated<Infer<CreateTransactionSchema>>;
 		type: 'expense' | 'income';
 		categories: Categories[];
+		formId?: string;
 	}
 
-	let { form, type, categories }: Props = $props();
+	let { form, type, categories, formId }: Props = $props();
 
 	let submitText = $state('Create Transaction');
 	let clearFormContent = $state(false);
 	const formSettings = superForm(form, {
+		id: formId,
 		validators: zodClient(createTransactionSchema),
 		validationMethod: 'onsubmit',
 		onSubmit: () => {
@@ -49,6 +56,7 @@
 				case 'success':
 					clearFormContent = true;
 					submitText = 'Created!';
+					notificationsCount.transactions += 1;
 					setTimeout(() => {
 						submitText = 'Create Transaction';
 					}, 2000);

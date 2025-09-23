@@ -125,17 +125,20 @@
 			{
 				name: 'Dashboard',
 				url: '#',
-				icon: HouseIcon
+				icon: HouseIcon,
+				slug: 'dashboard'
 			},
 			{
 				name: 'Transactions',
-				url: '#',
-				icon: CoinsIcon
+				url: '/app/transactions',
+				icon: CoinsIcon,
+				slug: 'transactions'
 			},
 			{
 				name: 'Categories',
 				url: '/app/categories/new',
-				icon: NotebookTextIcon
+				icon: NotebookTextIcon,
+				slug: 'categories'
 			}
 		]
 	};

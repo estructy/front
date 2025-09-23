@@ -7,13 +7,24 @@
 	import Plus from '@lucide/svelte/icons/plus';
 	import MobileNavBar from '@/components/custom/mobile-nav-bar.svelte';
 	import { goto } from '$app/navigation';
+	import {
+		loadNotificationsFromLocalStore,
+		saveNotificationsToLocalStore
+	} from '@/stores/notifications.svelte';
+	import { onMount } from 'svelte';
 
 	let { children } = $props();
 
 	function newTransaction() {
 		goto('/app/transactions/new');
 	}
+
+	onMount(() => {
+		loadNotificationsFromLocalStore();
+	});
 </script>
+
+<svelte:window onbeforeunload={() => saveNotificationsToLocalStore()} />
 
 <Sidebar.Provider>
 	<AppSidebar />
