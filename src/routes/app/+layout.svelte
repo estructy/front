@@ -66,10 +66,10 @@
 		<!--<div class="min-h-[100vh] flex-1 rounded-xl bg-muted/50 md:min-h-min"></div>-->
 		<!--</div>-->
 
-		<div class="flex items-center gap-2 px-4">
+		<div class="px-4 pb-24 md:pb-4">
 			{@render children?.()}
-
-			<MobileNavBar {newTransaction} />
 		</div>
+
+		<MobileNavBar {newTransaction} />
 	</Sidebar.Inset>
 </Sidebar.Provider>

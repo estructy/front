@@ -45,8 +45,7 @@
 							<item.icon />
 							<span>{item.name}</span>
 							{#if hasNotifications(item.slug as 'transactions' | 'categories')}
-								<span
-									class="ml-auto flex h-5 w-5 items-center justify-center rounded-full bg-red-400 text-xs text-white"
+								<span class="ml-auto flex h-5 w-5 items-center justify-center text-xs text-gray-500"
 									>{getNotificationsCount(item.slug as 'transactions' | 'categories')}</span
 								>
 							{/if}
