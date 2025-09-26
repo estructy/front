@@ -1,12 +1,11 @@
 import type { ColumnDef } from '@tanstack/table-core';
 //import { createRawSnippet } from 'svelte';
 //import { renderSnippet } from '$lib/components/ui/data-table/index.js';
-import { renderComponent, renderSnippet } from '$lib/components/ui/data-table/index.js';
+import { renderComponent } from '$lib/components/ui/data-table/index.js';
 import DataTableActions from './data-table-actions.svelte';
 //import DataTableEmailButton from './data-table-email-button.svelte';
 import Checkbox from './data-table-checkbox.svelte';
 import type { Transaction } from '@/api/@types/transaction';
-import { createRawSnippet } from 'svelte';
 
 export const columns: ColumnDef<Transaction>[] = [
 	{
@@ -15,13 +14,13 @@ export const columns: ColumnDef<Transaction>[] = [
 			renderComponent(Checkbox, {
 				checked: table.getIsAllPageRowsSelected(),
 				indeterminate: table.getIsSomePageRowsSelected() && !table.getIsAllPageRowsSelected(),
-				onCheckedChange: (value) => table.toggleAllPageRowsSelected(!!value),
+				onCheckedChange: (value: boolean) => table.toggleAllPageRowsSelected(!!value),
 				'aria-label': 'Select all'
 			}),
 		cell: ({ row }) =>
 			renderComponent(Checkbox, {
 				checked: row.getIsSelected(),
-				onCheckedChange: (value) => row.toggleSelected(!!value),
+				onCheckedChange: (value: boolean) => row.toggleSelected(!!value),
 				'aria-label': 'Select row'
 			}),
 		enableSorting: false,
@@ -29,7 +28,8 @@ export const columns: ColumnDef<Transaction>[] = [
 	},
 	{
 		accessorKey: 'transaction_code',
-		header: 'Transaction Code'
+		header: 'Transaction Code',
+		id: 'transaction code'
 	},
 	{
 		accessorKey: 'date',
@@ -37,11 +37,16 @@ export const columns: ColumnDef<Transaction>[] = [
 	},
 	{
 		accessorKey: 'category.type',
-		header: 'Type'
+		header: 'Type',
+		id: 'type'
 	},
 	{
 		accessorKey: 'category.name',
-		header: 'Category'
+		header: 'Category',
+		id: 'category',
+		filterFn: (row, id, value: string[]) => {
+			return value.includes(row.getValue(id));
+		}
 	},
 	{
 		accessorKey: 'amount',

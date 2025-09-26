@@ -16,19 +16,30 @@
 		getSortedRowModel
 	} from '@tanstack/table-core';
 	import * as DropdownMenu from '$lib/components/ui/dropdown-menu/index.js';
+	import Settings2 from '@lucide/svelte/icons/settings-2';
+	import Separator from '@/components/ui/separator/separator.svelte';
+	import CirclePlus from '@lucide/svelte/icons/circle-plus';
+	import Badge from '@/components/ui/badge/badge.svelte';
+	import X from '@lucide/svelte/icons/x';
+	import type { Category } from '@/api/@types/transaction';
 
 	type DataTableProps<TData, TValue> = {
 		columns: ColumnDef<TData, TValue>[];
 		data: TData[];
+		categories: Category[];
 	};
 
-	let { columns, data }: DataTableProps<TData, TValue> = $props();
+	let { columns, data, categories }: DataTableProps<TData, TValue> = $props();
 
 	let pagination = $state<PaginationState>({ pageIndex: 0, pageSize: 10 });
 	let sorting = $state<SortingState>([]);
 	let columnFilters = $state<ColumnFiltersState>([]);
 	let columnVisibility = $state<VisibilityState>({});
 	let rowSelection = $state<RowSelectionState>({});
+	let columnTypeSelection = $state<string>('');
+	let categorySelection = $state<Category[]>([]);
+
+	let columnTypes = ['expense', 'income'];
 
 	const table = createSvelteTable({
 		get data() {
@@ -94,31 +105,140 @@
 	});
 </script>
 
-<div class="rounded-md border">
+<div class="rounded-md">
 	<div class="flex justify-between py-4">
-		<div class="flex-row items-center">
+		<div class="flex flex-row items-center gap-2">
 			<DropdownMenu.Root>
 				<DropdownMenu.Trigger>
 					{#snippet child({ props })}
-						<Button {...props} variant="outline" class="ml-auto">Columns</Button>
+						<Button {...props} variant="outline" class="ml-auto"
+							><CirclePlus />Type
+							{#if columnTypeSelection}
+								<Separator orientation="vertical" />
+								<Badge variant="outline">{columnTypeSelection}</Badge>
+							{/if}
+						</Button>
 					{/snippet}
 				</DropdownMenu.Trigger>
-				<DropdownMenu.Content align="end">
-					{#each table.getAllColumns().filter((col) => col.getCanHide()) as column (column.id)}
+				<DropdownMenu.Content align="start">
+					{#each columnTypes as type (type)}
 						<DropdownMenu.CheckboxItem
 							class="capitalize"
-							bind:checked={() => column.getIsVisible(), (v) => column.toggleVisibility(!!v)}
+							bind:checked={
+								() => {
+									return columnTypeSelection === type;
+								},
+								(v) => {
+									if (v) {
+										columnTypeSelection = type;
+										table.getColumn('type')?.setFilterValue(type);
+									} else {
+										columnTypeSelection = '';
+										table.getColumn('type')?.setFilterValue(undefined);
+									}
+								}
+							}
 						>
-							{column.id}
+							{type}
 						</DropdownMenu.CheckboxItem>
 					{/each}
+					{#if columnTypeSelection}
+						<Separator />
+						<DropdownMenu.Item
+							class="flex cursor-pointer  justify-center"
+							onclick={() => {
+								columnTypeSelection = '';
+								table.getColumn('type')?.setFilterValue(undefined);
+							}}
+						>
+							Clear Filter
+						</DropdownMenu.Item>
+					{/if}
 				</DropdownMenu.Content>
 			</DropdownMenu.Root>
+
+			<DropdownMenu.Root>
+				<DropdownMenu.Trigger>
+					{#snippet child({ props })}
+						<Button {...props} variant="outline" class="ml-auto"
+							><CirclePlus />Categories
+
+							{#if categorySelection.length && categorySelection.length <= 3}
+								<Separator orientation="vertical" />
+								{#each categorySelection as category (category.category_code)}
+									<Badge
+										variant="outline"
+										class="capitalize"
+										style="background-color: blue; color: white">{category.name}</Badge
+									>
+								{/each}
+							{:else if categorySelection.length > 3}
+								<Separator orientation="vertical" />
+								<Badge variant="outline">{categorySelection.length} selected</Badge>
+							{/if}
+						</Button>
+					{/snippet}
+				</DropdownMenu.Trigger>
+				<DropdownMenu.Content align="start">
+					{#each categories as category (category.category_code)}
+						<DropdownMenu.CheckboxItem
+							class="capitalize"
+							bind:checked={
+								() => categorySelection?.some((c) => c.name === category.name),
+								(v) => {
+									if (v) {
+										categorySelection = [...categorySelection, category];
+									} else {
+										categorySelection = categorySelection.filter((c) => c.name !== category.name);
+									}
+									const codes = categorySelection.map((c) => c.name);
+
+									if (codes.length) {
+										table.getColumn('category')?.setFilterValue(codes);
+									} else {
+										table.getColumn('category')?.setFilterValue(undefined);
+									}
+								}
+							}
+						>
+							<span class="h-4 w-4 rounded-full" style="background-color: blue"></span>
+							{category.name}
+						</DropdownMenu.CheckboxItem>
+					{/each}
+					{#if categorySelection.length}
+						<Separator />
+						<DropdownMenu.Item
+							class="flex cursor-pointer  justify-center"
+							onclick={() => {
+								categorySelection = [];
+								table.getColumn('category')?.setFilterValue(undefined);
+							}}
+						>
+							Clear Filter
+						</DropdownMenu.Item>
+					{/if}
+				</DropdownMenu.Content>
+			</DropdownMenu.Root>
+
+			{#if columnTypeSelection || categorySelection.length}
+				<Button
+					variant="ghost"
+					onclick={() => {
+						columnTypeSelection = '';
+						table.getColumn('type')?.setFilterValue(undefined);
+						categorySelection = [];
+						table.getColumn('category')?.setFilterValue(undefined);
+					}}
+				>
+					Clear
+					<X />
+				</Button>
+			{/if}
 		</div>
 
 		<div class="flex flex-row gap-2">
 			<Input
-				placeholder="Filter emails..."
+				placeholder="Filter by description..."
 				value={(table.getColumn('email')?.getFilterValue() as string) ?? ''}
 				onchange={(e) => {
 					table.getColumn('email')?.setFilterValue(e.currentTarget.value);
@@ -131,10 +251,12 @@
 			<DropdownMenu.Root>
 				<DropdownMenu.Trigger>
 					{#snippet child({ props })}
-						<Button {...props} variant="outline" class="ml-auto">Columns</Button>
+						<Button {...props} variant="outline" class="ml-auto"><Settings2 /> Columns</Button>
 					{/snippet}
 				</DropdownMenu.Trigger>
 				<DropdownMenu.Content align="end">
+					<p class="px-2 py-1 text-center text-sm font-medium">Toggle Columns</p>
+					<Separator />
 					{#each table.getAllColumns().filter((col) => col.getCanHide()) as column (column.id)}
 						<DropdownMenu.CheckboxItem
 							class="capitalize"
