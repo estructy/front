@@ -1,7 +1,7 @@
 <script lang="ts" generics="TData, TValue">
 	import { createSvelteTable, FlexRender } from '$lib/components/ui/data-table/index.js';
 	import * as Table from '$lib/components/ui/table/index.js';
-	import Button from '@/components/ui/button/button.svelte';
+	import Button, { buttonVariants } from '@/components/ui/button/button.svelte';
 	import Input from '@/components/ui/input/input.svelte';
 	import {
 		type ColumnDef,
@@ -22,6 +22,18 @@
 	import Badge from '@/components/ui/badge/badge.svelte';
 	import X from '@lucide/svelte/icons/x';
 	import type { Category } from '@/api/@types/transaction';
+	import {
+		CalendarDate,
+		DateFormatter,
+		getLocalTimeZone,
+		type DateValue
+	} from '@internationalized/date';
+	import * as Popover from '$lib/components/ui/popover/index.js';
+	import CalendarIcon from '@lucide/svelte/icons/calendar';
+	import { cn } from '@/utils';
+	import { RangeCalendar } from '$lib/components/ui/range-calendar/index.js';
+	import type { DateRange } from 'bits-ui';
+	import { onMount } from 'svelte';
 
 	type DataTableProps<TData, TValue> = {
 		columns: ColumnDef<TData, TValue>[];
@@ -38,6 +50,7 @@
 	let rowSelection = $state<RowSelectionState>({});
 	let columnTypeSelection = $state<string>('');
 	let categorySelection = $state<Category[]>([]);
+	let isMobile = $state<boolean>(false);
 
 	let columnTypes = ['expense', 'income'];
 
@@ -103,15 +116,87 @@
 			}
 		}
 	});
+
+	const df = new DateFormatter('en-US', {
+		dateStyle: 'medium'
+	});
+
+	let value: DateRange = $state({
+		start: new CalendarDate(2022, 1, 20),
+		end: new CalendarDate(2022, 1, 20).add({ days: 20 })
+	});
+
+	let startValue: DateValue | undefined = $state(undefined);
+
+	function checkMobile() {
+		isMobile = window.matchMedia('(max-width: 768px)').matches; // md breakpoint from Tailwind
+	}
+
+	function setMaxCategorySelection() {
+		if (isMobile) return 2;
+		return 3;
+	}
+
+	onMount(() => {
+		checkMobile();
+		window.addEventListener('resize', checkMobile);
+		return () => window.removeEventListener('resize', checkMobile);
+	});
 </script>
 
-<div class="rounded-md">
-	<div class="flex justify-between py-4">
-		<div class="flex flex-row items-center gap-2">
+<div>
+	<div class="flex flex-col justify-between gap-4 py-4 md:flex-row md:flex-wrap">
+		<Popover.Root>
+			<Popover.Trigger
+				class={cn(buttonVariants({ variant: 'outline' }), !value && 'text-muted-foreground')}
+			>
+				<CalendarIcon class="mr-2 size-4" />
+				{#if value && value.start}
+					{#if value.end}
+						{df.format(value.start.toDate(getLocalTimeZone()))} - {df.format(
+							value.end.toDate(getLocalTimeZone())
+						)}
+					{:else}
+						{df.format(value.start.toDate(getLocalTimeZone()))}
+					{/if}
+				{:else if startValue}
+					{df.format(startValue.toDate(getLocalTimeZone()))}
+				{:else}
+					Pick a date
+				{/if}
+			</Popover.Trigger>
+			<Popover.Content class="w-auto p-0" align="start">
+				<RangeCalendar
+					bind:value
+					onStartValueChange={(v) => {
+						startValue = v;
+					}}
+					numberOfMonths={2}
+				/>
+			</Popover.Content>
+		</Popover.Root>
+
+		<Input
+			placeholder="Search by description..."
+			value={(table.getColumn('email')?.getFilterValue() as string) ?? ''}
+			onchange={(e) => {
+				table.getColumn('email')?.setFilterValue(e.currentTarget.value);
+			}}
+			oninput={(e) => {
+				table.getColumn('email')?.setFilterValue(e.currentTarget.value);
+			}}
+			class="md:max-w-sm"
+		/>
+	</div>
+
+	<Separator class="bg-boder border border-dashed" />
+
+	<div class="flex flex-col py-4 md:flex-row md:justify-between">
+		<div class="flex flex-col gap-2 justify-self-start md:flex-row md:items-center">
 			<DropdownMenu.Root>
 				<DropdownMenu.Trigger>
 					{#snippet child({ props })}
-						<Button {...props} variant="outline" class="ml-auto"
+						<Button {...props} variant="outline" class="md:ml-auto"
 							><CirclePlus />Type
 							{#if columnTypeSelection}
 								<Separator orientation="vertical" />
@@ -160,10 +245,10 @@
 			<DropdownMenu.Root>
 				<DropdownMenu.Trigger>
 					{#snippet child({ props })}
-						<Button {...props} variant="outline" class="ml-auto"
+						<Button {...props} variant="outline" class="md:ml-auto"
 							><CirclePlus />Categories
 
-							{#if categorySelection.length && categorySelection.length <= 3}
+							{#if categorySelection.length && categorySelection.length <= setMaxCategorySelection()}
 								<Separator orientation="vertical" />
 								{#each categorySelection as category (category.category_code)}
 									<Badge
@@ -172,7 +257,7 @@
 										style="background-color: blue; color: white">{category.name}</Badge
 									>
 								{/each}
-							{:else if categorySelection.length > 3}
+							{:else if categorySelection.length > setMaxCategorySelection()}
 								<Separator orientation="vertical" />
 								<Badge variant="outline">{categorySelection.length} selected</Badge>
 							{/if}
@@ -222,6 +307,7 @@
 
 			{#if columnTypeSelection || categorySelection.length}
 				<Button
+					class="self-end"
 					variant="ghost"
 					onclick={() => {
 						columnTypeSelection = '';
@@ -236,18 +322,7 @@
 			{/if}
 		</div>
 
-		<div class="flex flex-row gap-2">
-			<Input
-				placeholder="Filter by description..."
-				value={(table.getColumn('email')?.getFilterValue() as string) ?? ''}
-				onchange={(e) => {
-					table.getColumn('email')?.setFilterValue(e.currentTarget.value);
-				}}
-				oninput={(e) => {
-					table.getColumn('email')?.setFilterValue(e.currentTarget.value);
-				}}
-				class="max-w-sm"
-			/>
+		<div class="hidden flex-row gap-2 md:flex">
 			<DropdownMenu.Root>
 				<DropdownMenu.Trigger>
 					{#snippet child({ props })}
@@ -269,7 +344,7 @@
 			</DropdownMenu.Root>
 		</div>
 	</div>
-	<div class="rounded-md border">
+	<div class="hidden rounded-md border md:block">
 		<Table.Root>
 			<Table.Header>
 				{#each table.getHeaderGroups() as headerGroup (headerGroup.id)}
