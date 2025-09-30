@@ -17,6 +17,8 @@
 	} from '@tanstack/table-core';
 	import * as DropdownMenu from '$lib/components/ui/dropdown-menu/index.js';
 	import Settings2 from '@lucide/svelte/icons/settings-2';
+	import ArrowUpRight from '@lucide/svelte/icons/arrow-up-right';
+	import ArrowDownLeft from '@lucide/svelte/icons/arrow-down-left';
 	import Separator from '@/components/ui/separator/separator.svelte';
 	import CirclePlus from '@lucide/svelte/icons/circle-plus';
 	import Badge from '@/components/ui/badge/badge.svelte';
@@ -34,6 +36,7 @@
 	import { RangeCalendar } from '$lib/components/ui/range-calendar/index.js';
 	import type { DateRange } from 'bits-ui';
 	import { onMount } from 'svelte';
+	import Card from '@/components/ui/card/card.svelte';
 
 	type DataTableProps<TData, TValue> = {
 		columns: ColumnDef<TData, TValue>[];
@@ -137,6 +140,13 @@
 		return 3;
 	}
 
+	function formatAmount(amount: number) {
+		return new Intl.NumberFormat('en-US', {
+			style: 'currency',
+			currency: 'USD'
+		}).format(amount);
+	}
+
 	onMount(() => {
 		checkMobile();
 		window.addEventListener('resize', checkMobile);
@@ -178,12 +188,12 @@
 
 		<Input
 			placeholder="Search by description..."
-			value={(table.getColumn('email')?.getFilterValue() as string) ?? ''}
+			value={(table.getColumn('description')?.getFilterValue() as string) ?? ''}
 			onchange={(e) => {
-				table.getColumn('email')?.setFilterValue(e.currentTarget.value);
+				table.getColumn('description')?.setFilterValue(e.currentTarget.value);
 			}}
 			oninput={(e) => {
-				table.getColumn('email')?.setFilterValue(e.currentTarget.value);
+				table.getColumn('description')?.setFilterValue(e.currentTarget.value);
 			}}
 			class="md:max-w-sm"
 		/>
@@ -344,6 +354,93 @@
 			</DropdownMenu.Root>
 		</div>
 	</div>
+
+	<!--Mobile View-->
+	<div class="grid grid-cols-1 gap-4 md:hidden">
+		{#each table.getRowModel().rows as row (row.id)}
+			{@const selectCell = row.getVisibleCells().find((c) => c.column.id === 'select')}
+			{@const descriptionCell = row.getVisibleCells().find((c) => c.column.id === 'description')}
+			{@const categoryCell = row.getVisibleCells().find((c) => c.column.id === 'category')}
+			{@const dateCell = row.getVisibleCells().find((c) => c.column.id === 'created_at')}
+			{@const amountCell = row.getVisibleCells().find((c) => c.column.id === 'amount')}
+			{@const typeCell = row.getVisibleCells().find((c) => c.column.id === 'type')}
+			{@const actionsCell = row.getVisibleCells().find((c) => c.column.id === 'actions')}
+			{@const transaction = row.original as {
+				category: { name: string; color: string; type: string };
+				transaction_code: string;
+				date: string;
+				amount: number;
+			}}
+
+			<Card
+				class="group relative overflow-hidden border border-border bg-card transition-all hover:shadow-sm"
+			>
+				<div class="flex items-center gap-4 p-4 md:p-5">
+					<div class="flex-shrink-0">
+						{#if selectCell}
+							<FlexRender
+								content={selectCell.column.columnDef.cell}
+								context={selectCell.getContext()}
+							/>
+						{/if}
+					</div>
+
+					<!--Main Content -->
+					<div class="flex min-w-0 flex-1 items-center justify-between gap-4">
+						<div class="min-w-0 flex-1">
+							<div class="flex items-center gap-2">
+								<div
+									class="h-2 w-2 flex-shrink-0 rounded-full sm:hidden"
+									style="background-color: red"
+								></div>
+								<h3 class="text-sm font-medium text-card-foreground">
+									{transaction.category.name}
+								</h3>
+								<span
+									class="inline-flex items-center gap-1 rounded-full px-2 py-0.5 text-xs font-medium"
+									style="background-color: {transaction.category?.type === 'income'
+										? 'oklch(0.95 0.05 145)'
+										: 'oklch(0.95 0.05 25)'}; color: {transaction.category?.type === 'income'
+										? 'oklch(0.40 0.15 145)'
+										: 'oklch(0.45 0.20 25)'}"
+								>
+									{#if transaction.category?.type === 'income'}
+										<ArrowDownLeft size={15} />
+									{:else}
+										<ArrowUpRight size={15} />
+									{/if}
+									{transaction.category?.type === 'income' ? 'Income' : 'Expense'}
+								</span>
+							</div>
+							<div class="mt-1 flex items-center gap-3 text-xs text-muted-foreground">
+								<span>{transaction.date}</span>
+								<span class="font-mono">{transaction.transaction_code}</span>
+							</div>
+						</div>
+					</div>
+
+					<!--Amount-->
+					<div class="flex-shrink-0 text-right">
+						<div
+							class="text-lg font-semibold tabular-nums"
+							style="color: {transaction.category?.type === 'income'
+								? 'oklch(0.50 0.15 145)'
+								: 'oklch(0.50 0.20 25)'}"
+						>
+							{#if transaction.category?.type === 'income'}
+								+
+							{:else}
+								-
+							{/if}
+							{formatAmount(transaction.amount)}
+						</div>
+					</div>
+				</div>
+			</Card>
+		{/each}
+	</div>
+
+	<!--Web View-->
 	<div class="hidden rounded-md border md:block">
 		<Table.Root>
 			<Table.Header>
@@ -380,9 +477,17 @@
 		</Table.Root>
 	</div>
 	<div class="flex items-center justify-end space-x-2 py-4">
-		<div class="flex-1 text-sm text-muted-foreground">
-			{table.getFilteredSelectedRowModel().rows.length} of{' '}
-			{table.getFilteredRowModel().rows.length} row(s) selected.
+		<div
+			class="flex flex-1 flex-col gap-2 text-sm text-muted-foreground md:flex-row md:items-center"
+		>
+			<div>
+				{table.getFilteredSelectedRowModel().rows.length} of{' '}
+				{table.getFilteredRowModel().rows.length} row(s) selected.
+			</div>
+
+			{#if table.getFilteredSelectedRowModel().rows.length}
+				<Button variant="outline" size="sm" class="w-1/3 md:w-1/12">Delete</Button>
+			{/if}
 		</div>
 		<Button
 			variant="outline"
