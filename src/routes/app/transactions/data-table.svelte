@@ -44,13 +44,15 @@
 		columns: ColumnDef<TData, TValue>[];
 		data: TData[];
 		categories: Category[];
-		date: {
+		search: {
 			from: string;
 			to: string;
+			type: string;
+			categories: string;
 		};
 	};
 
-	let { columns, data, categories, date }: DataTableProps<TData, TValue> = $props();
+	let { columns, data, categories, search }: DataTableProps<TData, TValue> = $props();
 
 	let pagination = $state<PaginationState>({ pageIndex: 0, pageSize: 10 });
 	let sorting = $state<SortingState>([]);
@@ -131,7 +133,7 @@
 	});
 
 	function getInitialDate() {
-		const { from, to } = date;
+		const { from, to } = search;
 		const [fromYear, fromMonth, fromDay] = from.split('-').map(Number);
 		const [toYear, toMonth, toDay] = to.split('-').map(Number);
 
@@ -189,16 +191,62 @@
 		if (value.end) {
 			params.set('to', value.end.toString());
 		}
+		if (columnTypeSelection) {
+			params.set('type', columnTypeSelection);
+		} else {
+			params.delete('type');
+		}
+		if (categorySelection.length) {
+			const categoryCodes = categorySelection.map((cat) => cat.category_code).join(',');
+			params.set('categories', categoryCodes);
+		} else {
+			params.delete('categories');
+		}
 
 		const newRelativePathQuery = `${window.location.pathname}?${params.toString()}`;
 
 		pushState(newRelativePathQuery, {});
 	}
 
+	function deleteURLSearchParams(filter?: 'type' | 'categories') {
+		const params = new URLSearchParams(window.location.search);
+
+		if (filter === 'type') {
+			params.delete('type');
+		} else if (filter === 'categories') {
+			params.delete('categories');
+		} else {
+			params.delete('type');
+			params.delete('categories');
+		}
+
+		const newRelativePathQuery = `${window.location.pathname}?${params.toString()}`;
+
+		pushState(newRelativePathQuery, {});
+	}
+
+	(() => {
+		if (search.type) {
+			columnTypeSelection = search.type;
+			table.getColumn('type')?.setFilterValue(search.type);
+		}
+		if (search.categories) {
+			const categoryCodes = search.categories.split(',');
+			categorySelection = categories.filter((cat) => categoryCodes.includes(cat.category_code));
+			const categoryNames = categorySelection.map((cat) => cat.name);
+			table.getColumn('category')?.setFilterValue(categoryNames);
+		}
+	})();
+
 	onMount(() => {
 		checkMobile();
 		window.addEventListener('resize', checkMobile);
 		value = getInitialDate();
+
+		if (search.from) {
+			const currentParams = new URLSearchParams(window.location.search);
+			history.pushState({}, '', `?from=${search.from}&to=${search.to}&${currentParams.toString()}`);
+		}
 
 		return () => window.removeEventListener('resize', checkMobile);
 	});
@@ -320,6 +368,7 @@
 										columnTypeSelection = '';
 										table.getColumn('type')?.setFilterValue(undefined);
 									}
+									updateURLSearchParams();
 								}
 							}
 						>
@@ -333,6 +382,7 @@
 							onclick={() => {
 								columnTypeSelection = '';
 								table.getColumn('type')?.setFilterValue(undefined);
+								deleteURLSearchParams('type');
 							}}
 						>
 							Clear Filter
@@ -382,6 +432,7 @@
 									} else {
 										table.getColumn('category')?.setFilterValue(undefined);
 									}
+									updateURLSearchParams();
 								}
 							}
 						>
@@ -396,6 +447,7 @@
 							onclick={() => {
 								categorySelection = [];
 								table.getColumn('category')?.setFilterValue(undefined);
+								deleteURLSearchParams('categories');
 							}}
 						>
 							Clear Filter
@@ -413,6 +465,7 @@
 						table.getColumn('type')?.setFilterValue(undefined);
 						categorySelection = [];
 						table.getColumn('category')?.setFilterValue(undefined);
+						deleteURLSearchParams();
 					}}
 				>
 					Clear

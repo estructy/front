@@ -5,6 +5,7 @@ interface ListRequest {
 	type?: 'expense' | 'income';
 	from?: string;
 	to?: string;
+	categories?: string;
 }
 
 interface ApiResponse {
@@ -52,5 +53,8 @@ function setParams(url: URL, request: ListRequest) {
 	}
 	if (request.to) {
 		url.searchParams.append('to', request.to);
+	}
+	if (request.categories) {
+		url.searchParams.append('categories', request.categories);
 	}
 }

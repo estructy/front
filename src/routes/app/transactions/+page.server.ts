@@ -6,6 +6,9 @@ export async function load({ url }: PageServerLoadEvent) {
 	let from: string | null = url.searchParams.get('from');
 	let to: string | null = url.searchParams.get('to');
 
+	const type: string | null = url.searchParams.get('type');
+	const categories: string | null = url.searchParams.get('categories');
+
 	if (!from || !to) {
 		({ startDateStr: from, endDateStr: to } = getDateRange());
 	}
@@ -15,9 +18,11 @@ export async function load({ url }: PageServerLoadEvent) {
 			from,
 			to
 		}),
-		date: {
+		search: {
 			from,
-			to
+			to,
+			type: type === 'expense' || type === 'income' ? type : '',
+			categories: categories || ''
 		}
 	};
 }

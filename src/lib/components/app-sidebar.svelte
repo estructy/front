@@ -136,7 +136,7 @@
 			},
 			{
 				name: 'Categories',
-				url: '/app/categories/new',
+				url: '/app/categories',
 				icon: NotebookTextIcon,
 				slug: 'categories'
 			}
