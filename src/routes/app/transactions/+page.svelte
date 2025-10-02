@@ -23,4 +23,4 @@
 	});
 </script>
 
-<DataTable data={data.transactions} {columns} {categories} />
+<DataTable data={data.transactions} date={data.date} {columns} {categories} />

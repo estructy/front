@@ -13,7 +13,6 @@ export const loadNotificationsFromLocalStore = () => {
 		const parsed = JSON.parse(storedNotifications);
 		notificationsCount.transactions = parsed.transactions || 0;
 		notificationsCount.categories = parsed.categories || 0;
-		console.log(notificationsCount);
 	}
 };
 

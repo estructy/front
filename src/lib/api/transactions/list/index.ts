@@ -1,4 +1,4 @@
-import { API_URL } from '$env/static/private';
+import { PUBLIC_API_URL } from '$env/static/public';
 import type { Transaction } from '@/api/@types/transaction';
 
 interface ListRequest {
@@ -16,7 +16,7 @@ interface ApiResponse {
 
 export async function list(request?: ListRequest): Promise<Transaction[]> {
 	try {
-		const url = new URL(`${API_URL}/transactions`);
+		const url = new URL(`${PUBLIC_API_URL}/transactions`);
 
 		if (request) {
 			setParams(url, request);
@@ -37,7 +37,7 @@ export async function list(request?: ListRequest): Promise<Transaction[]> {
 			throw new Error('Unable to fetch transactions: ' + (data as any).message);
 		}
 
-		return data.transactions;
+		return data.transactions || [];
 	} catch (err) {
 		throw new Error('Unable to fetch transactions: ' + (err as Error).message);
 	}
