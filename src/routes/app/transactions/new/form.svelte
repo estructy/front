@@ -11,7 +11,7 @@
 		today
 	} from '@internationalized/date';
 	import { goto } from '$app/navigation';
-	import { onMount, setContext } from 'svelte';
+	import { onMount } from 'svelte';
 
 	import type { Infer, SuperValidated } from 'sveltekit-superforms';
 	import type { CreateTransactionSchema } from './schema';
@@ -27,11 +27,8 @@
 	import { createTransactionSchema } from './schema';
 	import * as Popover from '$lib/components/ui/popover/index.js';
 	import * as Select from '$lib/components/ui/select';
-	import {
-		loadNotificationsFromLocalStore,
-		notificationsCount,
-		saveNotificationsToLocalStore
-	} from '@/stores/notifications.svelte';
+	import { notificationsCount } from '@/stores/notifications.svelte';
+	import { browser } from '$app/environment';
 
 	interface Props {
 		form: SuperValidated<Infer<CreateTransactionSchema>>;
@@ -87,7 +84,11 @@
 	});
 
 	function handleGoBack() {
-		goto('/app');
+		if (browser) {
+			window.history.back();
+		} else {
+			goto('/app');
+		}
 	}
 </script>
 

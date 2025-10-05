@@ -13,6 +13,13 @@
 </script>
 
 <div class="grid grid-cols-1 gap-4 md:grid-cols-2">
+	<Card.Root class="place-content-center border-2 border-dashed border-muted hover:border-primary">
+		<Card.Content class="flex  items-center justify-center">
+			<Button variant="outline" size="sm" href={`/app/categories/new?type=${type}`}>
+				New Category
+			</Button>
+		</Card.Content>
+	</Card.Root>
 	{#each categories as category}
 		<Card.Root>
 			<Card.Header>

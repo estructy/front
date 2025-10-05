@@ -243,11 +243,6 @@
 		window.addEventListener('resize', checkMobile);
 		value = getInitialDate();
 
-		if (search.from) {
-			const currentParams = new URLSearchParams(window.location.search);
-			history.pushState({}, '', `?from=${search.from}&to=${search.to}&${currentParams.toString()}`);
-		}
-
 		return () => window.removeEventListener('resize', checkMobile);
 	});
 

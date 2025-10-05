@@ -9,6 +9,7 @@
 	import { zod4Client as zodClient } from 'sveltekit-superforms/adapters';
 	import { createCategorySchema } from './schema.js';
 	import * as Form from '$lib/components/ui/form/index.js';
+	import { browser } from '$app/environment';
 
 	let { data } = $props();
 
@@ -50,6 +51,8 @@
 	function handleGoBack() {
 		if (redirectValue) {
 			goto(`/app/${redirectValue}`);
+		} else if (browser) {
+			window.history.back();
 		} else {
 			goto('/app');
 		}

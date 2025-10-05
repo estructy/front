@@ -124,7 +124,7 @@
 		projects: [
 			{
 				name: 'Dashboard',
-				url: '#',
+				url: '/app',
 				icon: HouseIcon,
 				slug: 'dashboard'
 			},
