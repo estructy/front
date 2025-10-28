@@ -39,6 +39,7 @@
 	import Card from '@/components/ui/card/card.svelte';
 	import { list } from '@/api/transactions/list';
 	import { pushState } from '$app/navigation';
+	import { page } from '$app/state';
 
 	type DataTableProps<TData, TValue> = {
 		columns: ColumnDef<TData, TValue>[];
@@ -169,6 +170,7 @@
 		try {
 			loading = true;
 			const response = await list({
+				token: page.data.token,
 				from: value.start?.toDate(getLocalTimeZone()).toISOString().split('T')[0],
 				to: value.end?.toDate(getLocalTimeZone()).toISOString().split('T')[0]
 			});

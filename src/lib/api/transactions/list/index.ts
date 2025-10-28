@@ -2,6 +2,7 @@ import { PUBLIC_API_URL } from '$env/static/public';
 import type { Transaction } from '@/api/@types/transaction';
 
 interface ListRequest {
+	token: string;
 	type?: 'expense' | 'income';
 	from?: string;
 	to?: string;
@@ -26,7 +27,8 @@ export async function list(request?: ListRequest): Promise<Transaction[]> {
 		const response = await fetch(url.toString(), {
 			headers: {
 				'Content-Type': 'application/json',
-				'X-Account-ID': 'b8773d3e-f81d-49a9-ae49-1c8bba3e939d'
+				'X-Account-ID': 'b8773d3e-f81d-49a9-ae49-1c8bba3e939d',
+				Authorization: `Bearer ${request?.token}`
 			},
 			method: 'GET'
 		});

@@ -2,6 +2,7 @@ import { PUBLIC_API_URL } from '$env/static/public';
 import type { ByCategory } from '@/api/@types/reports';
 
 interface Request {
+	token: string;
 	type?: string;
 	from: string;
 	to: string;
@@ -23,7 +24,8 @@ export async function byCategory(request: Request) {
 	const response = await fetch(url.toString(), {
 		headers: {
 			'Content-Type': 'application/json',
-			'X-Account-ID': 'b8773d3e-f81d-49a9-ae49-1c8bba3e939d'
+			'X-Account-ID': 'b8773d3e-f81d-49a9-ae49-1c8bba3e939d',
+			Authorization: `Bearer ${request.token ?? ''}`
 		},
 		method: 'GET'
 	});

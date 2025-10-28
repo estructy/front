@@ -12,6 +12,10 @@ export const handle: Handle = async ({ event, resolve }) => {
 		return Response.redirect(new URL('/sign-in', event.url), 303);
 	}
 
+	const token = cookies.get('estructy-auth.session_token');
+
+	event.locals.token = token;
+
 	const response = await resolve(event);
 	return response;
 };
