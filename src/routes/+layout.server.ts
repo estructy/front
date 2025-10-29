@@ -3,9 +3,12 @@ import type { LayoutServerLoad } from './$types';
 import { authClient } from '@/auth-client';
 import { isJwtExpiringSoon } from '@/helpers';
 
-export const load: LayoutServerLoad = async ({ cookies }) => {
-	if (!cookies.get('better-auth.session_token')) {
+export const load: LayoutServerLoad = async ({ cookies, url }) => {
+	if (!cookies.get('better-auth.session_token') && !url.pathname.startsWith('/sign-in')) {
 		redirect(303, '/sign-in');
+		return;
+	} else if (url.pathname.startsWith('/sign-in')) {
+		return;
 	}
 
 	const sessionToken = cookies.get('estructy-auth.session_token');

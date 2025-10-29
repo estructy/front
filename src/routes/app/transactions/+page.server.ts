@@ -2,7 +2,7 @@ import * as transactionsApi from '@/api/transactions';
 import { getDateRange } from '$lib/helpers';
 import type { PageServerLoadEvent } from './$types';
 
-export async function load({ url }: PageServerLoadEvent) {
+export async function load({ url, locals }: PageServerLoadEvent) {
 	let from: string | null = url.searchParams.get('from');
 	let to: string | null = url.searchParams.get('to');
 
@@ -15,6 +15,7 @@ export async function load({ url }: PageServerLoadEvent) {
 
 	return {
 		transactions: await transactionsApi.list({
+			token: locals.token,
 			from,
 			to
 		}),
