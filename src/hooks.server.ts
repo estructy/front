@@ -17,9 +17,18 @@ export const handle: Handle = async ({ event, resolve }) => {
 		return Response.redirect(new URL('/sign-in', event.url), 303);
 	}
 
+	if (!hasAuthCookie) {
+		const response = await resolve(event);
+		return response;
+	}
+
 	let sessionToken = cookies.get('estructy-auth.session_token');
 	let dataUser = cookies.get('estructy-data.user');
 	let dataAccount = cookies.get('estructy-data.account');
+
+	if (route.startsWith('/app/account/setup') && dataAccount) {
+		return Response.redirect(new URL('/app', event.url), 303);
+	}
 
 	if (!sessionToken || !dataUser || isJwtExpiringSoon(sessionToken)) {
 		const { data, error } = await fetchUserData(

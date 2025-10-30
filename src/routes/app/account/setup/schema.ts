@@ -4,7 +4,7 @@ export const createAccountSchema = z.object({
 	userName: z.string().min(2).max(50),
 	accountName: z.string().min(2).max(50),
 	currency: z.string().length(3),
-	invites: z.array(z.string()).optional()
+	invites: z.array(z.string().optional()).optional()
 });
 
 export type CreateAccountSchema = typeof createAccountSchema;
