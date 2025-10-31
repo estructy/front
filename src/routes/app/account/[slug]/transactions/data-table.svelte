@@ -171,6 +171,7 @@
 			loading = true;
 			const response = await list({
 				token: page.data.token,
+				accountId: page.data.accountId,
 				from: value.start?.toDate(getLocalTimeZone()).toISOString().split('T')[0],
 				to: value.end?.toDate(getLocalTimeZone()).toISOString().split('T')[0]
 			});
@@ -321,6 +322,7 @@
 		</Popover.Root>
 
 		<Input
+			disabled
 			placeholder="Search by description..."
 			value={(table.getColumn('description')?.getFilterValue() as string) ?? ''}
 			onchange={(e) => {

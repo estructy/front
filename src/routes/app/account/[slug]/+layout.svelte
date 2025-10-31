@@ -12,6 +12,8 @@
 	} from '@/stores/notifications.svelte';
 	import { onMount } from 'svelte';
 	import { replaceParams, routes } from '@/routes.js';
+	import Separator from '@/components/ui/separator/separator.svelte';
+	import { page } from '$app/state';
 
 	let { children, data } = $props();
 
@@ -22,6 +24,18 @@
 			})
 		);
 	}
+
+	const breadcrumbs = $derived.by(() => {
+		const path = page.url.pathname.replace(`/app/account/${data?.accountId ?? ''}`, '');
+		const segments = path.split('/').filter(Boolean);
+
+		return segments.map((part, index) => {
+			return {
+				name: part.charAt(0).toUpperCase() + part.slice(1),
+				href: `/app/account/${data?.accountId ?? ''}/${segments.slice(0, index + 1).join('/')}`
+			};
+		});
+	});
 
 	onMount(() => {
 		loadNotificationsFromLocalStore();
@@ -37,19 +51,23 @@
 			class="border-b-solid flex h-16 shrink-0 items-center gap-2 border-b-1 border-gray-200 transition-[width,height] ease-linear group-has-data-[collapsible=icon]/sidebar-wrapper:h-12"
 		>
 			<div class="flex w-full items-center justify-between gap-2 px-4">
-				<!--<Sidebar.Trigger class="-ml-1" />-->
-				<!--<Separator orientation="vertical" class="mr-2 data-[orientation=vertical]:h-4" />-->
-				<Breadcrumb.Root>
-					<Breadcrumb.List>
-						<Breadcrumb.Item class="hidden md:block">
-							<Breadcrumb.Link href="#">Building Your Application</Breadcrumb.Link>
-						</Breadcrumb.Item>
-						<Breadcrumb.Separator class="hidden md:block" />
-						<Breadcrumb.Item>
-							<Breadcrumb.Page>New Transaction</Breadcrumb.Page>
-						</Breadcrumb.Item>
-					</Breadcrumb.List>
-				</Breadcrumb.Root>
+				<div class="flex items-center gap-2">
+					<Separator orientation="vertical" class="h-4" />
+					<Breadcrumb.Root>
+						<Breadcrumb.List>
+							{#each breadcrumbs as item, index}
+								<Breadcrumb.Item>
+									{#if index !== breadcrumbs.length - 1}
+										<Breadcrumb.Link href={item.href}>{item.name}</Breadcrumb.Link>
+										<Breadcrumb.Separator />
+									{:else}
+										<Breadcrumb.Page>{item.name}</Breadcrumb.Page>
+									{/if}
+								</Breadcrumb.Item>
+							{/each}
+						</Breadcrumb.List>
+					</Breadcrumb.Root>
+				</div>
 
 				<Button
 					class=" ml-auto hidden h-8 bg-indigo-600 px-3 text-white  hover:bg-indigo-700 hover:text-white md:inline-flex"
