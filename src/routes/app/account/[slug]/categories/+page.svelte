@@ -16,10 +16,18 @@
 				<Tabs.Trigger value="income">Income</Tabs.Trigger>
 			</Tabs.List>
 			<Tabs.Content value="expense">
-				<CardView categories={expenseCategories} type="expense" accountId={data.accountId} />
+				<CardView
+					categories={expenseCategories}
+					type="expense"
+					accountId={data.account.currentAccountId}
+				/>
 			</Tabs.Content>
 			<Tabs.Content value="income">
-				<CardView categories={incomeCategories} type="income" accountId={data.accountId} />
+				<CardView
+					categories={incomeCategories}
+					type="income"
+					accountId={data.account.currentAccountId}
+				/>
 			</Tabs.Content>
 		</Tabs.Root>
 	</div>

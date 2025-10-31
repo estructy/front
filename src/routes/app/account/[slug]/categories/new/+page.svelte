@@ -27,7 +27,8 @@
 				case 'success':
 					if (redirectValue) {
 						await goto(
-							replaceParams(routes.base, { accountId: data.accountId }) + `/${redirectValue}`
+							replaceParams(routes.base, { accountId: data.account.currentAccountId }) +
+								`/${redirectValue}`
 						);
 					}
 					submitText = 'Created!';
@@ -53,7 +54,10 @@
 
 	function handleGoBack() {
 		if (redirectValue) {
-			goto(replaceParams(routes.base, { accountId: data.accountId }) + `/${redirectValue}`);
+			goto(
+				replaceParams(routes.base, { accountId: data.account.currentAccountId }) +
+					`/${redirectValue}`
+			);
 		} else if (browser) {
 			window.history.back();
 		} else {

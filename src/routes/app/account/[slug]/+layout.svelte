@@ -20,19 +20,22 @@
 	function newTransaction() {
 		goto(
 			replaceParams(routes.newTransaction, {
-				accountId: data?.accountId ?? ''
+				accountId: data?.account.currentAccountId ?? ''
 			})
 		);
 	}
 
 	const breadcrumbs = $derived.by(() => {
-		const path = page.url.pathname.replace(`/app/account/${data?.accountId ?? ''}`, '');
+		const path = page.url.pathname.replace(
+			`/app/account/${data?.account.currentAccountId ?? ''}`,
+			''
+		);
 		const segments = path.split('/').filter(Boolean);
 
 		return segments.map((part, index) => {
 			return {
 				name: part.charAt(0).toUpperCase() + part.slice(1),
-				href: `/app/account/${data?.accountId ?? ''}/${segments.slice(0, index + 1).join('/')}`
+				href: `/app/account/${data?.account.currentAccountId ?? ''}/${segments.slice(0, index + 1).join('/')}`
 			};
 		});
 	});
@@ -45,7 +48,7 @@
 <svelte:window onbeforeunload={() => saveNotificationsToLocalStore()} />
 
 <Sidebar.Provider>
-	<AppSidebar accountId={data.accountId} />
+	<AppSidebar appAccount={data.account} />
 	<Sidebar.Inset>
 		<header
 			class="border-b-solid flex h-16 shrink-0 items-center gap-2 border-b-1 border-gray-200 transition-[width,height] ease-linear group-has-data-[collapsible=icon]/sidebar-wrapper:h-12"
@@ -92,6 +95,6 @@
 			{@render children?.()}
 		</div>
 
-		<MobileNavBar {newTransaction} accountId={data.accountId} />
+		<MobileNavBar {newTransaction} accountId={data.account.currentAccountId} />
 	</Sidebar.Inset>
 </Sidebar.Provider>

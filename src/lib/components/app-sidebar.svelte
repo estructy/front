@@ -16,16 +16,17 @@
 	import * as Sidebar from '$lib/components/ui/sidebar/index.js';
 	import type { ComponentProps } from 'svelte';
 	import { replaceParams, routes } from '@/routes';
+	import { type AppAccount } from '../../@types/global';
 
 	let {
 		ref = $bindable(null),
 		collapsible = 'icon',
-		accountId,
+		appAccount,
 		...restProps
-	}: ComponentProps<typeof Sidebar.Root> & { accountId: string } = $props();
+	}: ComponentProps<typeof Sidebar.Root> & { appAccount: AppAccount } = $props();
 
 	const account = {
-		accountId
+		accountId: appAccount.currentAccountId
 	};
 
 	// This is sample data.
@@ -164,7 +165,7 @@
 
 <Sidebar.Root {collapsible} {...restProps}>
 	<Sidebar.Header>
-		<TeamSwitcher teams={data.teams} />
+		<TeamSwitcher account={appAccount} />
 	</Sidebar.Header>
 	<Sidebar.Content>
 		<!--<NavMain items={data.navMain} />-->

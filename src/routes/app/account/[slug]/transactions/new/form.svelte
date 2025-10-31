@@ -30,7 +30,6 @@
 	import { notificationsCount } from '@/stores/notifications.svelte';
 	import { browser } from '$app/environment';
 	import { replaceParams, routes, withQuery } from '@/routes';
-	import { page } from '$app/state';
 
 	interface Props {
 		form: SuperValidated<Infer<CreateTransactionSchema>>;

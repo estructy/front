@@ -3,6 +3,7 @@ import { authClient } from '@/auth-client';
 import { isJwtExpiringSoon } from '@/helpers';
 import { replaceParams, routes } from '@/routes';
 import type { Cookies, Handle } from '@sveltejs/kit';
+import type { AppAccount } from './@types/global';
 
 const forbiddenWithAuthRoutes = ['/sign-in'];
 
@@ -22,7 +23,9 @@ export const handle: Handle = async ({ event, resolve }) => {
 
 	let sessionToken = cookies.get('estructy-auth.session_token');
 	let dataUser = cookies.get('estructy-data.user');
-	let dataAccount = cookies.get('estructy-data.account');
+
+	const dataAccountCookie = cookies.get('estructy-data.account');
+	let dataAccount: AppAccount = dataAccountCookie ? JSON.parse(dataAccountCookie) : null;
 
 	if (!sessionToken || !dataUser || isJwtExpiringSoon(sessionToken)) {
 		const { data, error } = await fetchUserData(
@@ -50,25 +53,28 @@ export const handle: Handle = async ({ event, resolve }) => {
 
 	event.locals.user = JSON.parse(dataUser);
 	event.locals.token = sessionToken;
-	event.locals.accountId = dataAccount;
+	event.locals.account = dataAccount;
 
 	if (forbiddenWithAuthRoutes.some((r) => route.startsWith(r))) {
 		return Response.redirect(
-			new URL(replaceParams(routes.dashboard, { accountId: dataAccount }), event.url),
+			new URL(
+				replaceParams(routes.dashboard, { accountId: dataAccount.currentAccountId }),
+				event.url
+			),
 			303
 		);
 	}
 
 	if (route.startsWith('/app/account/setup') && dataAccount) {
 		return Response.redirect(
-			new URL(replaceParams(routes.dashboard, { accountId: dataAccount }), event.url),
+			new URL(replaceParams(routes.dashboard, { accountId: dataAccount.currentAccountId }), event.url),
 			303
 		);
 	}
 
 	if (route === '/app' && dataAccount) {
 		return Response.redirect(
-			new URL(replaceParams(routes.dashboard, { accountId: dataAccount }), event.url),
+			new URL(replaceParams(routes.dashboard, { accountId: dataAccount.currentAccountId }), event.url),
 			303
 		);
 	}
@@ -109,19 +115,27 @@ const fetchUserData = async (cookie: string) => {
 	};
 };
 
-const fetchUserAccount = async (token: string) => {
+const fetchUserAccount = async (token: string): Promise<AppAccount> => {
 	const account = await lastAccountAccessed({
 		token: token
 	});
 
-	return account.accountId || undefined;
+	return {
+		currentAccountId: account.accountId || '',
+		accounts: [
+			{
+				accountId: account.accountId || '',
+				accountName: "Account"
+			}
+		]
+	};
 };
 
 const setCookies = (
 	cookies: Cookies,
 	token: string | null,
 	user: unknown | null,
-	account: string | null
+	account: AppAccount | null
 ) => {
 	if (token) {
 		cookies.set('estructy-auth.session_token', token, { path: '/' });
@@ -132,6 +146,6 @@ const setCookies = (
 	}
 
 	if (account) {
-		cookies.set('estructy-data.account', account, { path: '/' });
+		cookies.set('estructy-data.account', JSON.stringify(account), { path: '/' });
 	}
 };

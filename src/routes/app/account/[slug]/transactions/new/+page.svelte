@@ -14,10 +14,22 @@
 				<Tabs.Trigger value="income">Income</Tabs.Trigger>
 			</Tabs.List>
 			<Tabs.Content value="expense">
-				<Form {form} {categories} type="expense" formId="expense" accountId={data.accountId} />
+				<Form
+					{form}
+					{categories}
+					type="expense"
+					formId="expense"
+					accountId={data.account.currentAccountId}
+				/>
 			</Tabs.Content>
 			<Tabs.Content value="income">
-				<Form {form} {categories} type="income" formId="income" accountId={data.accountId} />
+				<Form
+					{form}
+					{categories}
+					type="income"
+					formId="income"
+					accountId={data.account.currentAccountId}
+				/>
 			</Tabs.Content>
 		</Tabs.Root>
 	</div>

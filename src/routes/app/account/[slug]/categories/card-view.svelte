@@ -12,7 +12,6 @@
 	}
 
 	let { type, categories, accountId }: Props = $props();
-	//`/app/categories/new?type=${type}`
 </script>
 
 <div class="grid grid-cols-1 gap-4 md:grid-cols-2">

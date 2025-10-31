@@ -11,7 +11,7 @@ export async function load({ locals }: PageServerLoadEvent) {
 		categories: await categoriesApi.list({
 			withoutParent: true,
 			token: locals.token,
-			accountId: locals.accountId
+			accountId: locals.account.currentAccountId
 		})
 	};
 }
@@ -30,7 +30,7 @@ export const actions: Actions = {
 			const response = await categoriesApi.create({
 				...form.data,
 				token: event.locals.token,
-				accountId: event.locals.accountId
+				accountId: event.locals.account.currentAccountId
 			});
 			if (response.status === 409) {
 				setMessage(form, 'There are some conflicts, please review the form');

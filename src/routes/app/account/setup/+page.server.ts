@@ -51,7 +51,15 @@ export const actions: Actions = {
 			event.cookies.set('estructy-data.account', accountResponse.account_id, {
 				path: '/'
 			});
-			event.locals.accountId = accountResponse.account_id;
+			event.locals.account = {
+				currentAccountId: accountResponse.account_id,
+				accounts: [
+					{
+						accountId: accountResponse.account_id,
+						accountName: form.data.accountName
+					}
+				]
+			}
 			accountId = accountResponse.account_id;
 		} catch {
 			return fail(500, {

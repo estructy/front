@@ -10,8 +10,8 @@ export async function load({ locals }: PageServerLoadEvent) {
 	return {
 		form: await superValidate(zod(createTransactionSchema)),
 		categories: await categoriesApi.list({
-			token: locals.token as string,
-			accountId: locals.accountId as string
+			token: locals.token,
+			accountId: locals.account.currentAccountId
 		})
 	};
 }
@@ -32,8 +32,8 @@ export const actions: Actions = {
 			const response = await transactionsApi.create({
 				...form.data,
 				amount,
-				token: event.locals.token as string,
-				accountId: event.locals.accountId as string
+				token: event.locals.token,
+				accountId: event.locals.account.currentAccountId
 			});
 			if (response.status !== 201) {
 				setMessage(form, 'There are some conflicts, please review the form');
