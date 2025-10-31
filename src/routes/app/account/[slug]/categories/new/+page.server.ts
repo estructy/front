@@ -27,7 +27,11 @@ export const actions: Actions = {
 		}
 
 		try {
-			const response = await categoriesApi.create(form.data);
+			const response = await categoriesApi.create({
+				...form.data,
+				token: event.locals.token,
+				accountId: event.locals.accountId
+			});
 			if (response.status === 409) {
 				setMessage(form, 'There are some conflicts, please review the form');
 				return setError(form, 'name', 'Category with this name already exists');

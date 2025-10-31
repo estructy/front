@@ -31,7 +31,9 @@ export const actions: Actions = {
 
 			const response = await transactionsApi.create({
 				...form.data,
-				amount
+				amount,
+				token: event.locals.token as string,
+				accountId: event.locals.accountId as string
 			});
 			if (response.status !== 201) {
 				setMessage(form, 'There are some conflicts, please review the form');

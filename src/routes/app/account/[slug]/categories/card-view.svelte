@@ -42,7 +42,15 @@
 				<Button
 					variant="outline"
 					size="sm"
-					href={`/app/transactions?type=${type}&categories=${category.category_code}`}
+					href={withQuery(
+						replaceParams(routes.transactions, {
+							accountId: accountId
+						}),
+						{
+							type,
+							categories: category.category_code
+						}
+					)}
 					class="w-full"
 				>
 					View transactions

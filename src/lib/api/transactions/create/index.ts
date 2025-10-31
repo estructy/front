@@ -1,6 +1,8 @@
 import { API_URL } from '$env/static/private';
 
 interface CreateTransactionRequest {
+	token: string;
+	accountId: string;
 	category_code: string;
 	amount: number;
 	description: string;
@@ -14,13 +16,12 @@ export async function create(request: CreateTransactionRequest) {
 		const response = await fetch(url.toString(), {
 			headers: {
 				'Content-Type': 'application/json',
-				'X-Account-ID': 'b8773d3e-f81d-49a9-ae49-1c8bba3e939d',
-				'X-User-ID': '529f607c-572f-4fca-98c4-587f6c3cf196'
+				Authorization: `Bearer ${request.token}`,
+				'X-Account-ID': request.accountId
 			},
 			method: 'POST',
 			body: JSON.stringify(request)
 		});
-
 
 		return {
 			status: response.status

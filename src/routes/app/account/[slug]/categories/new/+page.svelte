@@ -26,7 +26,9 @@
 			switch (event.result.type) {
 				case 'success':
 					if (redirectValue) {
-						await goto(`/app/${redirectValue}`);
+						await goto(
+							replaceParams(routes.base, { accountId: data.accountId }) + `/${redirectValue}`
+						);
 					}
 					submitText = 'Created!';
 					setTimeout(() => {

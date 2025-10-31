@@ -16,6 +16,7 @@ export async function load({ url, locals }: PageServerLoadEvent) {
 	return {
 		transactions: await transactionsApi.list({
 			token: locals.token,
+			accountId: locals.accountId,
 			from,
 			to
 		}),

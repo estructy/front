@@ -1,6 +1,8 @@
 import { API_URL } from '$env/static/private';
 
 interface CreateRequest {
+	token: string;
+	accountId: string;
 	name: string;
 	type: 'expense' | 'income';
 	color: string;
@@ -18,7 +20,8 @@ export async function create(request: CreateRequest): Promise<CreateResponse> {
 		const response = await fetch(url.toString(), {
 			headers: {
 				'Content-Type': 'application/json',
-				'X-Account-ID': 'b8773d3e-f81d-49a9-ae49-1c8bba3e939d'
+				Authorization: `Bearer ${request.token}`,
+				'X-Account-ID': request.accountId
 			},
 			method: 'POST',
 			body: JSON.stringify(request)
