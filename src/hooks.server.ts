@@ -1,6 +1,7 @@
 import { lastAccountAccessed } from '@/api/user';
 import { authClient } from '@/auth-client';
 import { isJwtExpiringSoon } from '@/helpers';
+import { replaceParams, routes } from '@/routes';
 import type { Cookies, Handle } from '@sveltejs/kit';
 
 const forbiddenWithAuthRoutes = ['/sign-in'];
@@ -10,14 +11,11 @@ export const handle: Handle = async ({ event, resolve }) => {
 	const cookies = event.cookies;
 	const hasAuthCookie = cookies.get('better-auth.session_token');
 
-	if (hasAuthCookie && forbiddenWithAuthRoutes.some((r) => route.startsWith(r))) {
-		return Response.redirect(new URL('/app', event.url), 303);
-	}
-	if (route.startsWith('/app') && !hasAuthCookie) {
-		return Response.redirect(new URL('/sign-in', event.url), 303);
-	}
-
 	if (!hasAuthCookie) {
+		if (route.startsWith('/app')) {
+			return Response.redirect(new URL('/sign-in', event.url), 303);
+		}
+
 		const response = await resolve(event);
 		return response;
 	}
@@ -25,10 +23,6 @@ export const handle: Handle = async ({ event, resolve }) => {
 	let sessionToken = cookies.get('estructy-auth.session_token');
 	let dataUser = cookies.get('estructy-data.user');
 	let dataAccount = cookies.get('estructy-data.account');
-
-	if (route.startsWith('/app/account/setup') && dataAccount) {
-		return Response.redirect(new URL('/app', event.url), 303);
-	}
 
 	if (!sessionToken || !dataUser || isJwtExpiringSoon(sessionToken)) {
 		const { data, error } = await fetchUserData(
@@ -57,6 +51,27 @@ export const handle: Handle = async ({ event, resolve }) => {
 	event.locals.user = JSON.parse(dataUser);
 	event.locals.token = sessionToken;
 	event.locals.accountId = dataAccount;
+
+	if (forbiddenWithAuthRoutes.some((r) => route.startsWith(r))) {
+		return Response.redirect(
+			new URL(replaceParams(routes.dashboard, { accountId: dataAccount }), event.url),
+			303
+		);
+	}
+
+	if (route.startsWith('/app/account/setup') && dataAccount) {
+		return Response.redirect(
+			new URL(replaceParams(routes.dashboard, { accountId: dataAccount }), event.url),
+			303
+		);
+	}
+
+	if (route === '/app' && dataAccount) {
+		return Response.redirect(
+			new URL(replaceParams(routes.dashboard, { accountId: dataAccount }), event.url),
+			303
+		);
+	}
 
 	const response = await resolve(event);
 	return response;
