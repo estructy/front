@@ -29,15 +29,18 @@
 	import * as Select from '$lib/components/ui/select';
 	import { notificationsCount } from '@/stores/notifications.svelte';
 	import { browser } from '$app/environment';
+	import { replaceParams, routes, withQuery } from '@/routes';
+	import { page } from '$app/state';
 
 	interface Props {
 		form: SuperValidated<Infer<CreateTransactionSchema>>;
 		type: 'expense' | 'income';
 		categories: Categories[];
 		formId?: string;
+		accountId: string;
 	}
 
-	let { form, type, categories, formId }: Props = $props();
+	let { form, type, categories, formId, accountId }: Props = $props();
 
 	let submitText = $state('Create Transaction');
 	let clearFormContent = $state(false);
@@ -155,7 +158,12 @@
 						<p>
 							You need to create a {type} category before creating a transaction.
 							<a
-								href="/app/categories/new?redirect=transactions/new&type={type}"
+								href={withQuery(
+									replaceParams(routes.newCategory, {
+										accountId
+									}),
+									{ redirect: `transactions/new`, type }
+								)}
 								class="font-medium text-indigo-600 underline hover:text-indigo-500"
 								>Create a category</a
 							>.
@@ -208,7 +216,12 @@
 					? 'The category that best describes this expense.'
 					: 'The category that best describes this income.'}
 				<a
-					href="/app/categories/new?redirect=transactions/new&type={type}"
+					href={withQuery(
+						replaceParams(routes.newCategory, {
+							accountId
+						}),
+						{ redirect: `transactions/new`, type }
+					)}
 					class="text-indigo-600 hover:underline">Create new category</a
 				>
 			</Form.Description>

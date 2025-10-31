@@ -1,4 +1,4 @@
-<script lang="ts" module>
+<script lang="ts">
 	import AudioWaveformIcon from '@lucide/svelte/icons/audio-waveform';
 	import BookOpenIcon from '@lucide/svelte/icons/book-open';
 	import BotIcon from '@lucide/svelte/icons/bot';
@@ -9,6 +9,24 @@
 	import NotebookTextIcon from '@lucide/svelte/icons/notebook-text';
 	import Settings2Icon from '@lucide/svelte/icons/settings-2';
 	import SquareTerminalIcon from '@lucide/svelte/icons/square-terminal';
+	import NavMain from './nav-main.svelte';
+	import NavProjects from './nav-projects.svelte';
+	import NavUser from './nav-user.svelte';
+	import TeamSwitcher from './team-switcher.svelte';
+	import * as Sidebar from '$lib/components/ui/sidebar/index.js';
+	import type { ComponentProps } from 'svelte';
+	import { replaceParams, routes } from '@/routes';
+
+	let {
+		ref = $bindable(null),
+		collapsible = 'icon',
+		accountId,
+		...restProps
+	}: ComponentProps<typeof Sidebar.Root> & { accountId: string } = $props();
+
+	const account = {
+		accountId
+	};
 
 	// This is sample data.
 	const data = {
@@ -124,39 +142,24 @@
 		projects: [
 			{
 				name: 'Dashboard',
-				url: '/app',
+				url: replaceParams(routes.dashboard, account),
 				icon: HouseIcon,
 				slug: 'dashboard'
 			},
 			{
 				name: 'Transactions',
-				url: '/app/transactions',
+				url: replaceParams(routes.transactions, account),
 				icon: CoinsIcon,
 				slug: 'transactions'
 			},
 			{
 				name: 'Categories',
-				url: '/app/categories',
+				url: replaceParams(routes.categories, account),
 				icon: NotebookTextIcon,
 				slug: 'categories'
 			}
 		]
 	};
-</script>
-
-<script lang="ts">
-	import NavMain from './nav-main.svelte';
-	import NavProjects from './nav-projects.svelte';
-	import NavUser from './nav-user.svelte';
-	import TeamSwitcher from './team-switcher.svelte';
-	import * as Sidebar from '$lib/components/ui/sidebar/index.js';
-	import type { ComponentProps } from 'svelte';
-
-	let {
-		ref = $bindable(null),
-		collapsible = 'icon',
-		...restProps
-	}: ComponentProps<typeof Sidebar.Root> = $props();
 </script>
 
 <Sidebar.Root {collapsible} {...restProps}>

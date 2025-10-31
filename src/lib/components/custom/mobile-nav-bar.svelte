@@ -7,6 +7,7 @@
 	import NotebookText from '@lucide/svelte/icons/notebook-text';
 	import { goto } from '$app/navigation';
 	import { notificationsCount } from '@/stores/notifications.svelte';
+	import { replaceParams, routes } from '@/routes';
 
 	interface Props {
 		newTransaction: () => void;
@@ -16,9 +17,10 @@
 			categories?: number;
 			settings?: number;
 		};
+		accountId: string;
 	}
 
-	const { newTransaction }: Props = $props();
+	const { newTransaction, accountId }: Props = $props();
 </script>
 
 <div class="fixed right-0 bottom-0 left-0 border-t border-gray-200 bg-white shadow-lg md:hidden">
@@ -28,7 +30,7 @@
 				variant="ghost"
 				size="sm"
 				class="flex h-auto flex-col items-center gap-1 px-3 py-2 text-gray-600 hover:bg-gray-50 hover:text-indigo-600"
-				onclick={() => goto('/app')}
+				onclick={() => goto(replaceParams(routes.dashboard, { accountId }))}
 			>
 				<House size={20} />
 				<span class="text-xs font-medium">Home</span>
@@ -47,7 +49,7 @@
 				variant="ghost"
 				size="sm"
 				class="flex h-auto flex-col items-center gap-1 px-3 py-2 text-gray-600 hover:bg-gray-50 hover:text-indigo-600"
-				onclick={() => goto('/app/transactions')}
+				onclick={() => goto(replaceParams(routes.transactions, { accountId }))}
 			>
 				<Coins size={20} />
 				<span class="text-xs font-medium">Transactions</span>
@@ -73,7 +75,7 @@
 				variant="ghost"
 				size="sm"
 				class="flex h-auto flex-col items-center gap-1 px-3 py-2 text-gray-600 hover:bg-gray-50 hover:text-indigo-600"
-				onclick={() => goto('/app/categories')}
+				onclick={() => goto(replaceParams(routes.categories, { accountId }))}
 			>
 				<NotebookText size={20} />
 				<span class="text-xs font-medium">Categories</span>

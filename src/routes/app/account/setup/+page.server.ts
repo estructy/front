@@ -1,7 +1,7 @@
 import { setMessage, superValidate } from 'sveltekit-superforms';
 import { zod4 as zod } from 'sveltekit-superforms/adapters';
 import { createAccountSchema } from './schema';
-import type { Actions } from '@sveltejs/kit';
+import { redirect, type Actions } from '@sveltejs/kit';
 import { fail } from 'assert';
 import * as accountsApi from '@/api/accounts';
 import { authClient } from '@/auth-client';
@@ -22,6 +22,7 @@ export const actions: Actions = {
 			});
 		}
 
+		let accountId: string;
 		try {
 			const [accountResponse, userResponse] = await Promise.all([
 				accountsApi.create({
@@ -47,9 +48,11 @@ export const actions: Actions = {
 				});
 			}
 
-			event.cookies.set('estructy-data.account', JSON.stringify(accountResponse.account_id), {
+			event.cookies.set('estructy-data.account', accountResponse.account_id, {
 				path: '/'
 			});
+			event.locals.accountId = accountResponse.account_id;
+			accountId = accountResponse.account_id;
 		} catch {
 			return fail(500, {
 				form,
@@ -59,6 +62,8 @@ export const actions: Actions = {
 
 		event.cookies.delete('estructy-auth.session_token', { path: '/' });
 		event.cookies.delete('estructy-data.user', { path: '/' });
+
+		redirect(303, `/app/account/${accountId}/dashboard`);
 
 		return {
 			form,

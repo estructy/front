@@ -4,11 +4,15 @@ import { createTransactionSchema } from './schema';
 import * as categoriesApi from '$lib/api/categories';
 import type { Actions } from '@sveltejs/kit';
 import * as transactionsApi from '$lib/api/transactions';
+import type { PageServerLoadEvent } from '../$types';
 
-export async function load() {
+export async function load({ locals }: PageServerLoadEvent) {
 	return {
 		form: await superValidate(zod(createTransactionSchema)),
-		categories: await categoriesApi.list()
+		categories: await categoriesApi.list({
+			token: locals.token as string,
+			accountId: locals.accountId as string
+		})
 	};
 }
 

@@ -3,19 +3,26 @@
 	import * as Card from '$lib/components/ui/card/index.js';
 	import { Button } from '$lib/components/ui/button/index.js';
 	import Circle from '@lucide/svelte/icons/circle';
+	import { replaceParams, routes, withQuery } from '@/routes';
 
 	interface Props {
 		type: 'income' | 'expense';
 		categories: Category[];
+		accountId: string;
 	}
 
-	let { type, categories }: Props = $props();
+	let { type, categories, accountId }: Props = $props();
+	//`/app/categories/new?type=${type}`
 </script>
 
 <div class="grid grid-cols-1 gap-4 md:grid-cols-2">
 	<Card.Root class="place-content-center border-2 border-dashed border-muted hover:border-primary">
 		<Card.Content class="flex  items-center justify-center">
-			<Button variant="outline" size="sm" href={`/app/categories/new?type=${type}`}>
+			<Button
+				variant="outline"
+				size="sm"
+				href={withQuery(replaceParams(routes.newCategory, { accountId: accountId }), { type })}
+			>
 				New Category
 			</Button>
 		</Card.Content>

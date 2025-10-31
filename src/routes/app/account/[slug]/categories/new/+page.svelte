@@ -10,6 +10,7 @@
 	import { createCategorySchema } from './schema.js';
 	import * as Form from '$lib/components/ui/form/index.js';
 	import { browser } from '$app/environment';
+	import { replaceParams, routes } from '@/routes.js';
 
 	let { data } = $props();
 
@@ -50,7 +51,7 @@
 
 	function handleGoBack() {
 		if (redirectValue) {
-			goto(`/app/${redirectValue}`);
+			goto(replaceParams(routes.base, { accountId: data.accountId }) + `/${redirectValue}`);
 		} else if (browser) {
 			window.history.back();
 		} else {

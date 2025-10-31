@@ -11,11 +11,16 @@
 		saveNotificationsToLocalStore
 	} from '@/stores/notifications.svelte';
 	import { onMount } from 'svelte';
+	import { replaceParams, routes } from '@/routes.js';
 
-	let { children } = $props();
+	let { children, data } = $props();
 
 	function newTransaction() {
-		goto('/app/transactions/new');
+		goto(
+			replaceParams(routes.newTransaction, {
+				accountId: data?.accountId ?? ''
+			})
+		);
 	}
 
 	onMount(() => {
@@ -26,7 +31,7 @@
 <svelte:window onbeforeunload={() => saveNotificationsToLocalStore()} />
 
 <Sidebar.Provider>
-	<AppSidebar />
+	<AppSidebar accountId={data.accountId} />
 	<Sidebar.Inset>
 		<header
 			class="border-b-solid flex h-16 shrink-0 items-center gap-2 border-b-1 border-gray-200 transition-[width,height] ease-linear group-has-data-[collapsible=icon]/sidebar-wrapper:h-12"
@@ -69,6 +74,6 @@
 			{@render children?.()}
 		</div>
 
-		<MobileNavBar {newTransaction} />
+		<MobileNavBar {newTransaction} accountId={data.accountId} />
 	</Sidebar.Inset>
 </Sidebar.Provider>

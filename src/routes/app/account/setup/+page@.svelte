@@ -8,7 +8,6 @@
 	import { createAccountSchema } from './schema';
 	import * as Select from '$lib/components/ui/select';
 	import { z } from 'zod/v4';
-	import { goto } from '$app/navigation';
 	import Spinner from '@/components/ui/spinner/spinner.svelte';
 
 	const INVITE_LIMIT = 1;
@@ -155,8 +154,12 @@
 										{...props}
 										placeholder="foo@bar.com"
 										type="email"
-										oninput={(e) => handleInviteInput(e.target.value, i)}
-										aria-invalid={$formData.invites && isEmail($formData.invites[i]) === false
+										oninput={(e) => {
+											// @ts-ignore
+											handleInviteInput(e.target.value, i);
+										}}
+										aria-invalid={$formData.invites &&
+										isEmail($formData.invites[i] as string) === false
 											? 'true'
 											: 'false'}
 									/>

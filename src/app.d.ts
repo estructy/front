@@ -14,7 +14,7 @@ declare global {
 				name: string;
 				image?: string | null | undefined;
 			};
-			accountId?: string | undefined;
+			accountId: string;
 		}
 		// interface PageData {}
 		// interface PageState {}
@@ -22,4 +22,4 @@ declare global {
 	}
 }
 
-export {};
+export { };

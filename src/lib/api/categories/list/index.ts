@@ -2,11 +2,13 @@ import { API_URL } from '$env/static/private';
 import type { Categories } from '@/api/@types/categories';
 
 interface ListRequest {
+	token: string;
+	accountId: string;
 	type?: 'expense' | 'income';
 	withoutParent?: boolean;
 }
 
-export async function list(request?: ListRequest): Promise<Categories[]> {
+export async function list(request: ListRequest): Promise<Categories[]> {
 	try {
 		const url = new URL(`${API_URL}/categories`);
 
@@ -17,7 +19,8 @@ export async function list(request?: ListRequest): Promise<Categories[]> {
 		const response = await fetch(url.toString(), {
 			headers: {
 				'Content-Type': 'application/json',
-				'X-Account-ID': 'b8773d3e-f81d-49a9-ae49-1c8bba3e939d'
+				Authorization: `Bearer ${request?.token}`,
+				'X-Account-ID': request?.accountId
 			},
 			method: 'GET'
 		});

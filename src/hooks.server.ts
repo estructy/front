@@ -51,7 +51,7 @@ export const handle: Handle = async ({ event, resolve }) => {
 			return Response.redirect(new URL('/app/account/setup', event.url), 303);
 		}
 
-		setCookies(cookies, null, null, dataAccount);
+		setCookies(cookies, null, null, dataAccount || null);
 	}
 
 	event.locals.user = JSON.parse(dataUser);
@@ -106,7 +106,7 @@ const setCookies = (
 	cookies: Cookies,
 	token: string | null,
 	user: unknown | null,
-	account: unknown | null
+	account: string | null
 ) => {
 	if (token) {
 		cookies.set('estructy-auth.session_token', token, { path: '/' });
@@ -117,6 +117,6 @@ const setCookies = (
 	}
 
 	if (account) {
-		cookies.set('estructy-data.account', JSON.stringify(account), { path: '/' });
+		cookies.set('estructy-data.account', account, { path: '/' });
 	}
 };

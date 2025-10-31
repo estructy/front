@@ -3,11 +3,16 @@ import { fail, setError, setMessage, superValidate } from 'sveltekit-superforms'
 import { zod4 as zod } from 'sveltekit-superforms/adapters';
 import { createCategorySchema } from './schema';
 import type { Actions } from '@sveltejs/kit';
+import type { PageServerLoadEvent } from '../$types';
 
-export async function load() {
+export async function load({ locals }: PageServerLoadEvent) {
 	return {
 		form: await superValidate(zod(createCategorySchema)),
-		categories: await categoriesApi.list({ withoutParent: true })
+		categories: await categoriesApi.list({
+			withoutParent: true,
+			token: locals.token,
+			accountId: locals.accountId
+		})
 	};
 }
 
