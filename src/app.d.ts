@@ -1,6 +1,6 @@
 // See https://svelte.dev/docs/kit/types#app.d.ts
 
-import type { AppAccount } from './@types/global';
+import type { AppAccount, AppUser } from './@types/global';
 
 // for information about these interfaces
 declare global {
@@ -8,15 +8,7 @@ declare global {
 		// interface Error {}
 		interface Locals {
 			token: string;
-			user: {
-				id: string;
-				createdAt: Date;
-				updatedAt: Date;
-				email: string;
-				emailVerified: boolean;
-				name: string;
-				image?: string | null | undefined;
-			};
+			user: AppUser;
 			account: AppAccount;
 		}
 		// interface PageData {}

@@ -16,14 +16,15 @@
 	import * as Sidebar from '$lib/components/ui/sidebar/index.js';
 	import type { ComponentProps } from 'svelte';
 	import { replaceParams, routes } from '@/routes';
-	import { type AppAccount } from '../../@types/global';
+	import { type AppAccount, type AppUser } from '../../@types/global';
 
 	let {
 		ref = $bindable(null),
 		collapsible = 'icon',
 		appAccount,
+		appUser,
 		...restProps
-	}: ComponentProps<typeof Sidebar.Root> & { appAccount: AppAccount } = $props();
+	}: ComponentProps<typeof Sidebar.Root> & { appAccount: AppAccount; appUser: AppUser } = $props();
 
 	const account = {
 		accountId: appAccount.currentAccountId
@@ -172,7 +173,13 @@
 		<NavProjects projects={data.projects} />
 	</Sidebar.Content>
 	<Sidebar.Footer>
-		<NavUser user={data.user} />
+		<NavUser
+			user={{
+				name: appUser.name,
+				email: appUser.email,
+				avatar: 'https://api.dicebear.com/9.x/notionists-neutral/svg?seed=Liliana'
+			}}
+		/>
 	</Sidebar.Footer>
 	<Sidebar.Rail />
 </Sidebar.Root>

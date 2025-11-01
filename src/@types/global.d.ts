@@ -4,4 +4,14 @@ export type AppAccount = {
 		accountId: string;
 		accountName: string;
 	}>;
-}
+};
+
+export type AppUser = {
+	id: string;
+	createdAt: Date;
+	updatedAt: Date;
+	email: string;
+	emailVerified: boolean;
+	name: string;
+	image?: string | null | undefined;
+};

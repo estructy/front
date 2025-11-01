@@ -48,7 +48,7 @@
 <svelte:window onbeforeunload={() => saveNotificationsToLocalStore()} />
 
 <Sidebar.Provider>
-	<AppSidebar appAccount={data.account} />
+	<AppSidebar appAccount={data.account} appUser={data.user} />
 	<Sidebar.Inset>
 		<header
 			class="border-b-solid flex h-16 shrink-0 items-center gap-2 border-b-1 border-gray-200 transition-[width,height] ease-linear group-has-data-[collapsible=icon]/sidebar-wrapper:h-12"
