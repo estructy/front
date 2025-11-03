@@ -4,8 +4,19 @@ import { isJwtExpiringSoon } from '@/helpers';
 import { replaceParams, routes } from '@/routes';
 import type { Cookies, Handle } from '@sveltejs/kit';
 import type { AppAccount } from './@types/global';
+import { paraglideMiddleware } from '@/paraglide/server';
 
 const forbiddenWithAuthRoutes = ['/sign-in'];
+
+const paraglideHandle: Handle = ({ event, resolve }) =>
+	paraglideMiddleware(event.request, ({ request: localizedRequest, locale }) => {
+		event.request = localizedRequest;
+		return resolve(event, {
+			transformPageChunk: ({ html }) => {
+				return html.replace('%lang%', locale);
+			}
+		});
+	});
 
 export const handle: Handle = async ({ event, resolve }) => {
 	const route = event.url.pathname;
@@ -17,7 +28,7 @@ export const handle: Handle = async ({ event, resolve }) => {
 			return Response.redirect(new URL('/sign-in', event.url), 303);
 		}
 
-		const response = await resolve(event);
+		const response = await paraglideHandle({ event, resolve });
 		return response;
 	}
 
@@ -41,18 +52,28 @@ export const handle: Handle = async ({ event, resolve }) => {
 		dataUser = JSON.stringify(data.session.data?.user);
 	}
 
+	event.locals.user = JSON.parse(dataUser);
+	event.locals.token = sessionToken;
+
 	if (!dataAccount) {
 		dataAccount = await fetchUserAccount(sessionToken);
 
-		if (!dataAccount && route.startsWith('/app') && !route.startsWith('/app/account/setup')) {
+		if (
+			forbiddenWithAuthRoutes.some((r) => route.startsWith(r)) ||
+			(dataAccount.currentAccountId === '' &&
+				route.startsWith('/app') &&
+				!route.startsWith('/app/account/setup'))
+		) {
 			return Response.redirect(new URL('/app/account/setup', event.url), 303);
 		}
 
-		setCookies(cookies, null, null, dataAccount || null);
+		if (dataAccount.currentAccountId === '') {
+			return paraglideHandle({ event, resolve });
+		} else {
+			setCookies(cookies, null, null, dataAccount || null);
+		}
 	}
 
-	event.locals.user = JSON.parse(dataUser);
-	event.locals.token = sessionToken;
 	event.locals.account = dataAccount;
 
 	if (forbiddenWithAuthRoutes.some((r) => route.startsWith(r))) {
@@ -85,8 +106,7 @@ export const handle: Handle = async ({ event, resolve }) => {
 		);
 	}
 
-	const response = await resolve(event);
-	return response;
+	return await paraglideHandle({ event, resolve });
 };
 
 const fetchUserData = async (cookie: string) => {

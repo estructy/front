@@ -5,6 +5,7 @@ import { redirect, type Actions } from '@sveltejs/kit';
 import { fail } from 'assert';
 import * as accountsApi from '@/api/accounts';
 import { authClient } from '@/auth-client';
+import type { AppAccount } from '../../../../@types/global';
 
 export async function load() {
 	return {
@@ -48,10 +49,7 @@ export const actions: Actions = {
 				});
 			}
 
-			event.cookies.set('estructy-data.account', accountResponse.account_id, {
-				path: '/'
-			});
-			event.locals.account = {
+			const account: AppAccount = {
 				currentAccountId: accountResponse.account_id,
 				accounts: [
 					{
@@ -59,7 +57,12 @@ export const actions: Actions = {
 						accountName: form.data.accountName
 					}
 				]
-			}
+			};
+
+			event.cookies.set('estructy-data.account', JSON.stringify(account), {
+				path: '/'
+			});
+			event.locals.account = account;
 			accountId = accountResponse.account_id;
 		} catch {
 			return fail(500, {
