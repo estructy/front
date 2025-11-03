@@ -15,6 +15,7 @@
 	import * as InputOTP from '$lib/components/ui/input-otp/index.js';
 	import { z } from 'zod/v4';
 	import { onMount } from 'svelte';
+	import { m } from '$lib/paraglide/messages';
 
 	let {
 		ref = $bindable(null),
@@ -55,6 +56,16 @@
 		email = params.get('email') || '';
 		disabledButtonTimeout();
 	});
+
+	function termsOfService() {
+		const message = m
+			.sign_in_terms_description({
+				action: m.verify_otp_continue().toLowerCase()
+			})
+			.replace('/t', `<a href="##">${m.sign_in_terms()}</a>`)
+			.replace('/p', `<a href="##">${m.sign_in_privacy()}</a>`);
+		return message;
+	}
 </script>
 
 <div class={cn('flex flex-col gap-6', className)} bind:this={ref} {...restProps}>
@@ -67,26 +78,20 @@
 					</div>
 					<span class="sr-only">Estructy</span>
 				</a>
-				<h1 class="text-xl font-bold">Welcome to Estructy</h1>
+				<h1 class="text-xl font-bold">{m.sign_in_welcome_message()}</h1>
 			</div>
 			<Field>
-				<FieldLabel>Enter the 6-digit code sent to your email</FieldLabel>
+				<FieldLabel class="justify-center">{m.verify_otp_description()}</FieldLabel>
 				<InputOTP.Root maxlength={6} class="justify-center" bind:value={otp}>
 					{#snippet children({ cells })}
 						<InputOTP.Group>
-							{#each cells.slice(0, 2) as cell (cell)}
+							{#each cells.slice(0, 3) as cell (cell)}
 								<InputOTP.Slot {cell} />
 							{/each}
 						</InputOTP.Group>
 						<InputOTP.Separator />
 						<InputOTP.Group>
-							{#each cells.slice(2, 4) as cell (cell)}
-								<InputOTP.Slot {cell} />
-							{/each}
-						</InputOTP.Group>
-						<InputOTP.Separator />
-						<InputOTP.Group>
-							{#each cells.slice(4, 6) as cell (cell)}
+							{#each cells.slice(3, 6) as cell (cell)}
 								<InputOTP.Slot {cell} />
 							{/each}
 						</InputOTP.Group>
@@ -112,7 +117,7 @@
 							goto(`/app`);
 						}
 					}}
-					>Continue
+					>{m.verify_otp_continue()}
 
 					{#if loading}
 						<Spinner />
@@ -125,7 +130,6 @@
 						authError = undefined;
 						resendOtpLoading = true;
 						newOtpLoading = true;
-						await new Promise((resolve) => setTimeout(resolve, 1000));
 						const { error } = await authClient.emailOtp.sendVerificationOtp({
 							email,
 							type: 'sign-in'
@@ -138,7 +142,8 @@
 							authError = error.message;
 						}
 					}}
-					>Resend OTP {#if resendOtpLoading && !newOtpLoading}(in {resendTimer}s){/if}
+					>{m.verify_otp_resend()}
+					{#if resendOtpLoading && !newOtpLoading}(in {resendTimer}s){/if}
 					{#if newOtpLoading}
 						<Spinner />
 					{/if}
@@ -147,14 +152,13 @@
 					{#if authError}
 						<span class="text-destructive">{authError}</span>
 					{:else}
-						Sign in or create an account by entering your email
+						{m.verify_otp_change_email()} <a href="/sign-in">{m.verify_otp_different_email()}</a>.
 					{/if}
 				</FieldDescription>
 			</Field>
 		</FieldGroup>
 	</form>
 	<FieldDescription class="px-6 text-center">
-		By clicking continue, you agree to our <a href="##">Terms of Service</a> and
-		<a href="##">Privacy Policy</a>.
+		{@html termsOfService()}
 	</FieldDescription>
 </div>

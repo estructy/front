@@ -13,6 +13,7 @@
 	import { authClient } from '@/auth-client';
 	import Spinner from './ui/spinner/spinner.svelte';
 	import { goto } from '$app/navigation';
+	import { m } from '$lib/paraglide/messages';
 
 	let {
 		ref = $bindable(null),
@@ -32,6 +33,16 @@
 		const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 		return emailRegex.test(email);
 	}
+
+	function termsOfService() {
+		const message = m
+			.sign_in_terms_description({
+				action: m.sign_in_button().toLowerCase()
+			})
+			.replace('/t', `<a href="##">${m.sign_in_terms()}</a>`)
+			.replace('/p', `<a href="##">${m.sign_in_privacy()}</a>`);
+		return message;
+	}
 </script>
 
 <div class={cn('flex flex-col gap-6', className)} bind:this={ref} {...restProps}>
@@ -44,14 +55,14 @@
 					</div>
 					<span class="sr-only">Estructy</span>
 				</a>
-				<h1 class="text-xl font-bold">Welcome to Estructy</h1>
+				<h1 class="text-xl font-bold">{m.sign_in_welcome_message()}</h1>
 			</div>
 			<Field>
 				<FieldLabel for="email-{id}">Email</FieldLabel>
 				<Input
 					id="email-{id}"
 					type="email"
-					placeholder="m@example.com"
+					placeholder={m.sign_in_email_placeholder()}
 					required
 					bind:value={email}
 				/>
@@ -62,7 +73,6 @@
 					onclick={async () => {
 						authError = undefined;
 						loading = true;
-						await new Promise((resolve) => setTimeout(resolve, 1000)); // Simulate network delay
 						const { error } = await authClient.emailOtp.sendVerificationOtp({
 							email,
 							type: 'sign-in'
@@ -75,7 +85,7 @@
 							goto(`/sign-in/verify-otp?email=${encodeURIComponent(email)}`);
 						}
 					}}
-					>Sign In
+					>{m.sign_in_button()}
 
 					{#if loading}
 						<Spinner />
@@ -85,14 +95,13 @@
 					{#if authError}
 						<span class="text-destructive">{authError}</span>
 					{:else}
-						Sign in or create an account by entering your email
+						{m.sign_in_field_description()}
 					{/if}
 				</FieldDescription>
 			</Field>
 		</FieldGroup>
 	</form>
 	<FieldDescription class="px-6 text-center">
-		By clicking Sign In, you agree to our <a href="##">Terms of Service</a> and
-		<a href="##">Privacy Policy</a>.
+		{@html termsOfService()}
 	</FieldDescription>
 </div>

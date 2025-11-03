@@ -1,0 +1,18 @@
+{
+	"$schema": "https://inlang.com/schema/inlang-message-format",
+	"go_to_sign_in": "Go to sign in",
+
+	"sign_in_welcome_message": "Welcome to Estructy",
+	"sign_in_email_placeholder": "your@email.com",
+	"sign_in_field_description": "Sign in or create an account by entering your email",
+	"sign_in_button": "Sign In",
+	"sign_in_terms_description": "By clicking {action}, you agree to our /t and /p.",
+	"sign_in_terms": "Terms of Service",
+	"sign_in_privacy": "Privacy Policy",
+
+	"verify_otp_description": "Enter the 6-digit code sent to your email",
+	"verify_otp_continue": "Continue",
+	"verify_otp_resend": "Resend Code",
+	"verify_otp_change_email": "Change your email address?",
+	"verify_otp_different_email": "Use a different email address"
+}

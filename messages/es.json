@@ -1,0 +1,5 @@
+{
+	"$schema": "https://inlang.com/schema/inlang-message-format",
+	"sign_in_field_description": "Inicia sesión o crea una cuenta ingresando tu correo electrónico",
+	"go_to_sign_in": "Ir a iniciar sesión"
+}

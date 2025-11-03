@@ -67,14 +67,20 @@ export const handle: Handle = async ({ event, resolve }) => {
 
 	if (route.startsWith('/app/account/setup') && dataAccount) {
 		return Response.redirect(
-			new URL(replaceParams(routes.dashboard, { accountId: dataAccount.currentAccountId }), event.url),
+			new URL(
+				replaceParams(routes.dashboard, { accountId: dataAccount.currentAccountId }),
+				event.url
+			),
 			303
 		);
 	}
 
 	if (route === '/app' && dataAccount) {
 		return Response.redirect(
-			new URL(replaceParams(routes.dashboard, { accountId: dataAccount.currentAccountId }), event.url),
+			new URL(
+				replaceParams(routes.dashboard, { accountId: dataAccount.currentAccountId }),
+				event.url
+			),
 			303
 		);
 	}
@@ -125,7 +131,7 @@ const fetchUserAccount = async (token: string): Promise<AppAccount> => {
 		accounts: [
 			{
 				accountId: account.accountId || '',
-				accountName: "Account"
+				accountName: 'Account'
 			}
 		]
 	};
