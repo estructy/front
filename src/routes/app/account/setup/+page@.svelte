@@ -9,19 +9,20 @@
 	import * as Select from '$lib/components/ui/select';
 	import { z } from 'zod/v4';
 	import Spinner from '@/components/ui/spinner/spinner.svelte';
+	import { m } from '$lib/paraglide/messages';
 
 	const INVITE_LIMIT = 1;
 
 	type CurrencryCodes = 'BRL' | 'USD' | 'EUR' | 'ARS' | 'PYG' | 'CLP' | 'UYU';
 
 	const currencyOptions = {
-		BRL: 'BRL - Brazilian Real',
+		BRL: 'BRL - Real Brasileiro',
 		USD: 'USD - US Dollar',
 		EUR: 'EUR - Euro',
-		ARS: 'ARS - Argentine Peso',
-		PYG: 'PYG - Paraguayan Guarani',
-		CLP: 'CLP - Chilean Peso',
-		UYU: 'UYU - Uruguayan Peso'
+		ARS: 'ARS - Peso Argentino',
+		PYG: 'PYG - Guaraní Paraguayo',
+		CLP: 'CLP - Peso Chileno',
+		UYU: 'UYU - Peso Uruguayo'
 	};
 
 	const { data } = $props();
@@ -48,7 +49,7 @@
 	});
 
 	$formData.currency ||= 'BRL';
-	$formData.accountName ||= 'Personal Account';
+	$formData.accountName ||= m.account_setup_account_name_placeholder();
 	$formData.invites ||= [''];
 
 	function handleInviteInput(value: string, index: number) {
@@ -79,10 +80,8 @@
 <div class="flex min-h-svh flex-col items-center justify-center gap-6 bg-background p-6 md:p-10">
 	<Card.Root class="w-full max-w-sm">
 		<Card.Header>
-			<Card.Title>Setup Account</Card.Title>
-			<Card.Description
-				>Please provide a name for your account. You can edit this later.</Card.Description
-			>
+			<Card.Title>{m.account_setup()}</Card.Title>
+			<Card.Description>{m.account_setup_name()}</Card.Description>
 		</Card.Header>
 		<Card.Content>
 			<form method="POST" use:enhance>
@@ -90,12 +89,14 @@
 					<Form.Field {form} name="userName">
 						<Form.Control>
 							{#snippet children({ props })}
-								<Form.Label>Your Name<span class="text-red-500">*</span></Form.Label>
+								<Form.Label
+									>{m.account_setup_name_label()}<span class="text-red-500">*</span></Form.Label
+								>
 								<Input {...props} bind:value={$formData.userName} placeholder="John Doe" />
 							{/snippet}
 						</Form.Control>
 						<Form.Description>
-							Enter your name, nickname, or whatever you prefer to be called.
+							{m.account_setup_name_description()}
 						</Form.Description>
 						<Form.FieldErrors />
 					</Form.Field>
@@ -103,7 +104,9 @@
 					<Form.Field {form} name="accountName">
 						<Form.Control>
 							{#snippet children({ props })}
-								<Form.Label>Account Name<span class="text-red-500">*</span></Form.Label>
+								<Form.Label
+									>{m.account_setup_account_name()}<span class="text-red-500">*</span></Form.Label
+								>
 								<Input
 									{...props}
 									bind:value={$formData.accountName}
@@ -112,7 +115,7 @@
 							{/snippet}
 						</Form.Control>
 						<Form.Description>
-							Give your account a name to easily identify it later.
+							{m.account_setup_account_name_description()}
 						</Form.Description>
 						<Form.FieldErrors />
 					</Form.Field>
@@ -120,7 +123,9 @@
 					<Form.Field {form} name="currency">
 						<Form.Control>
 							{#snippet children({ props })}
-								<Form.Label>Currency <span class="text-red-500">*</span></Form.Label>
+								<Form.Label
+									>{m.account_setup_currency()} <span class="text-red-500">*</span></Form.Label
+								>
 								<Select.Root
 									{...props}
 									type="single"
@@ -139,8 +144,7 @@
 							{/snippet}
 						</Form.Control>
 						<Form.Description>
-							Select the currency for this account. Later on, you can add transactions in different
-							currencies.
+							{m.account_setup_currency_description()}
 						</Form.Description>
 						<Form.FieldErrors />
 					</Form.Field>
@@ -148,7 +152,7 @@
 					<Form.Field {form} name="invites">
 						<Form.Control>
 							{#snippet children({ props })}
-								<Form.Label>Invites (optional)</Form.Label>
+								<Form.Label>{m.account_setup_invites()}</Form.Label>
 								{#each $formData.invites as string[] as _, i}
 									<Input
 										{...props}
@@ -167,14 +171,15 @@
 							{/snippet}
 						</Form.Control>
 						<Form.Description>
-							Invite friends or colleagues to join your account by entering their email addresses.
+							{m.account_setup_invites_description()}
 						</Form.Description>
 						<Form.FieldErrors />
 					</Form.Field>
 				</div>
 				<div class="mt-6 flex-col gap-2">
 					<Button type="submit" class="w-full" disabled={isFormValid || $submitting}
-						>Complete Setup {#if $submitting}<Spinner />{/if}</Button
+						>{m.account_setup_complete_button()}
+						{#if $submitting}<Spinner />{/if}</Button
 					>
 				</div>
 			</form>

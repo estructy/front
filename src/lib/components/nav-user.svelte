@@ -11,9 +11,32 @@
 	import CreditCardIcon from '@lucide/svelte/icons/credit-card';
 	import LogOutIcon from '@lucide/svelte/icons/log-out';
 	import SparklesIcon from '@lucide/svelte/icons/sparkles';
+	import Languages from '@lucide/svelte/icons/languages';
+	import { setLocale, locales, isLocale } from '$lib/paraglide/runtime';
+	import { m } from '$lib/paraglide/messages';
 
 	let { user }: { user: { name: string; email: string; avatar: string } } = $props();
 	const sidebar = useSidebar();
+
+	const localeOptions: {
+		value: string;
+		label: string;
+	}[] = locales.map((loc) => {
+		let label: string = '';
+
+		if (loc === 'en') {
+			label = 'English 🇺🇸';
+		} else if (loc === 'es') {
+			label = 'Español 🇪🇸';
+		} else if (loc === 'pt-BR') {
+			label = 'Português (Brasil) 🇧🇷';
+		}
+
+		return {
+			value: loc,
+			label
+		};
+	});
 </script>
 
 <Sidebar.Menu>
@@ -56,13 +79,32 @@
 						</div>
 					</div>
 				</DropdownMenu.Label>
-				<!--       <DropdownMenu.Separator />-->
-				<!--<DropdownMenu.Group>-->
-				<!--<DropdownMenu.Item>-->
-				<!--<SparklesIcon />-->
-				<!--Upgrade to Pro-->
-				<!--</DropdownMenu.Item>-->
-				<!--</DropdownMenu.Group>-->
+				<DropdownMenu.Separator />
+				<DropdownMenu.Group>
+					<DropdownMenu.Sub>
+						<DropdownMenu.SubTrigger
+							><Languages />
+							{m.nav_user_language()}
+						</DropdownMenu.SubTrigger>
+						<DropdownMenu.SubContent>
+							{#each localeOptions as locale (locale.value)}
+								<DropdownMenu.Item
+									onclick={() => {
+										if (isLocale(locale.value)) {
+											setLocale(locale.value);
+										}
+									}}
+								>
+									{locale.label}
+								</DropdownMenu.Item>
+							{/each}
+						</DropdownMenu.SubContent>
+					</DropdownMenu.Sub>
+					<!--<DropdownMenu.Item>-->
+					<!--<SparklesIcon />-->
+					<!--Upgrade to Pro-->
+					<!--</DropdownMenu.Item>-->
+				</DropdownMenu.Group>
 				<!--<DropdownMenu.Separator />-->
 				<!--<DropdownMenu.Group>-->
 				<!--<DropdownMenu.Item>-->
@@ -90,7 +132,7 @@
 						})}
 				>
 					<LogOutIcon />
-					Log out
+					{m.nav_user_logout()}
 				</DropdownMenu.Item>
 			</DropdownMenu.Content>
 		</DropdownMenu.Root>

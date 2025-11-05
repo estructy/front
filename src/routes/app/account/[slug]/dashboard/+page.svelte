@@ -3,6 +3,7 @@
 	import * as Card from '$lib/components/ui/card/index.js';
 	import ArrowUpRight from '@lucide/svelte/icons/arrow-up-right';
 	import { cn } from '@/utils';
+	import { m } from '$lib/paraglide/messages';
 
 	const { data } = $props();
 	let filter: 'all' | 'income' | 'expense' = $state('all');
@@ -26,8 +27,8 @@
 <div class="my-4 space-y-4">
 	<div class="flex items-center justify-between">
 		<div>
-			<h2 class="text-2xl font-bold tracking-tight">Categories</h2>
-			<p class="text-sm text-muted-foreground">Breakdown by category</p>
+			<h2 class="text-2xl font-bold tracking-tight">{m.dashboard_categories()}</h2>
+			<p class="text-sm text-muted-foreground">{m.dashboard_categories_description()}</p>
 		</div>
 		<div class="flex gap-2">
 			<Button
@@ -35,21 +36,21 @@
 				size="sm"
 				onclick={() => (filter = 'all')}
 			>
-				All
+				{m.dashboard_categories_filter_all()}
 			</Button>
 			<Button
 				variant={filter === 'income' ? 'default' : 'outline'}
 				size="sm"
 				onclick={() => (filter = 'income')}
 			>
-				Income
+				{m.dashboard_categories_filter_income()}
 			</Button>
 			<Button
 				variant={filter === 'expense' ? 'default' : 'outline'}
 				size="sm"
 				onclick={() => (filter = 'expense')}
 			>
-				Expenses
+				{m.dashboard_categories_filter_expenses()}
 			</Button>
 		</div>
 	</div>

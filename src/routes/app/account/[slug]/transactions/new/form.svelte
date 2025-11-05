@@ -30,6 +30,8 @@
 	import { notificationsCount } from '@/stores/notifications.svelte';
 	import { browser } from '$app/environment';
 	import { replaceParams, routes, withQuery } from '@/routes';
+	import { m } from '$lib/paraglide/messages';
+	import { getLocale } from '$lib/paraglide/runtime';
 
 	interface Props {
 		form: SuperValidated<Infer<CreateTransactionSchema>>;
@@ -41,27 +43,27 @@
 
 	let { form, type, categories, formId, accountId }: Props = $props();
 
-	let submitText = $state('Create Transaction');
+	let submitText = $state(m.transactions_new_form_submit_button());
 	let clearFormContent = $state(false);
 	const formSettings = superForm(form, {
 		id: formId,
 		validators: zodClient(createTransactionSchema),
 		validationMethod: 'onsubmit',
 		onSubmit: () => {
-			submitText = 'Creating...';
+			submitText = m.label_creating();
 		},
 		onResult: async (event) => {
 			switch (event.result.type) {
 				case 'success':
 					clearFormContent = true;
-					submitText = 'Created!';
+					submitText = m.label_created();
 					notificationsCount.transactions += 1;
 					setTimeout(() => {
-						submitText = 'Create Transaction';
+						submitText = m.transactions_new_form_submit_button();
 					}, 2000);
 					break;
 				case 'failure':
-					submitText = 'Try Again';
+					submitText = m.button_try_again();
 					break;
 			}
 		}
@@ -100,7 +102,10 @@
 	<Form.Field form={formSettings} name="date" class="flex flex-col">
 		<Form.Control>
 			{#snippet children({ props })}
-				<Form.Label>Transaction Date <span class="text-red-500">*</span></Form.Label>
+				<Form.Label
+					>{m.transactions_new_form_transaction_date()}
+					<span class="text-red-500">*</span></Form.Label
+				>
 				<Popover.Root bind:open={dateOpen}>
 					<Popover.Trigger
 						{...props}
@@ -110,11 +115,14 @@
 							!dateValue && 'text-muted-foreground'
 						)}
 					>
-						{dateValue ? df.format(dateValue.toDate(getLocalTimeZone())) : 'Pick a date'}
+						{dateValue
+							? df.format(dateValue.toDate(getLocalTimeZone()))
+							: m.transactions_new_form_transaction_date_placeholder()}
 						<CalendarIcon class="ml-auto size-4 opacity-50" />
 					</Popover.Trigger>
 					<Popover.Content class="w-auto p-0" side="top">
 						<Calendar
+							locale={getLocale()}
 							type="single"
 							value={dateValue as DateValue}
 							bind:placeholder={datePlaceholder}
@@ -136,8 +144,8 @@
 				</Popover.Root>
 				<Form.Description
 					>{type === 'expense'
-						? 'The date you made the purchase or payment.'
-						: 'The date you received the income.'}</Form.Description
+						? m.transactions_new_form_transaction_date_expense()
+						: m.transactions_new_form_transaction_date_income()}</Form.Description
 				>
 				<Form.FieldErrors />
 				<input hidden value={$formData.date} name={props.name} />
@@ -176,7 +184,10 @@
 			<Form.Control>
 				{#snippet children({ props })}
 					<div class="grid gap-2">
-						<Form.Label>Category <span class="text-red-500">*</span></Form.Label>
+						<Form.Label
+							>{m.transactions_new_form_transaction_category()}
+							<span class="text-red-500">*</span></Form.Label
+						>
 						<Select.Root
 							{...props}
 							type="single"
@@ -193,7 +204,7 @@
 										{triggerContent.name}
 									</div>
 								{:else}
-									Select a category
+									{m.transactions_new_form_transaction_category_placeholder()}
 								{/if}
 							</Select.Trigger>
 							<Select.Content>
@@ -212,8 +223,8 @@
 			</Form.Control>
 			<Form.Description class="flex flex-wrap items-center justify-between">
 				{type === 'expense'
-					? 'The category that best describes this expense.'
-					: 'The category that best describes this income.'}
+					? m.transactions_new_form_transaction_category_expense()
+					: m.transactions_new_form_transaction_category_income()}
 				<a
 					href={withQuery(
 						replaceParams(routes.newCategory, {
@@ -221,7 +232,7 @@
 						}),
 						{ redirect: `transactions/new`, type }
 					)}
-					class="text-indigo-600 hover:underline">Create new category</a
+					class="text-indigo-600 hover:underline">{m.transactions_new_form_new_category_button()}</a
 				>
 			</Form.Description>
 			<Form.FieldErrors />
@@ -231,7 +242,10 @@
 	<Form.Field form={formSettings} name="amount">
 		<Form.Control>
 			{#snippet children({ props })}
-				<Form.Label>Amount <span class="text-red-500">*</span></Form.Label>
+				<Form.Label
+					>{m.transactions_new_form_transaction_amount()}
+					<span class="text-red-500">*</span></Form.Label
+				>
 				<Input
 					{...props}
 					placeholder="$0.00"
@@ -251,8 +265,8 @@
 		</Form.Control>
 		<Form.Description
 			>{type === 'expense'
-				? 'The total amount of the expense, including tax and fees.'
-				: 'The total amount of income received.'}</Form.Description
+				? m.transactions_new_form_transaction_amount_expense()
+				: m.transactions_new_form_transaction_amount_income()}</Form.Description
 		>
 		<Form.FieldErrors />
 	</Form.Field>
@@ -260,14 +274,14 @@
 	<Form.Field form={formSettings} name="description">
 		<Form.Control>
 			{#snippet children({ props })}
-				<Form.Label>Description</Form.Label>
+				<Form.Label>{m.transactions_new_form_transaction_description()}</Form.Label>
 				<Editor
 					{...props}
 					bind:content={$formData.description}
 					bind:clearContent={clearFormContent}
 					placeholder={type === 'expense'
-						? 'Add any additional details about this expense...'
-						: 'Add any additional details about this income...'}
+						? m.transactions_new_form_transaction_description_expense()
+						: m.transactions_new_form_transaction_description_income()}
 				/>
 			{/snippet}
 		</Form.Control>
@@ -283,7 +297,7 @@
 			onclick={handleGoBack}
 			type="button"
 			class="bg-gray-200 text-gray-800 hover:bg-gray-300 focus-visible:outline-gray-400"
-			>Go Back</Button
+			>{m.button_go_back()}</Button
 		>
 		<Form.Button
 			type="submit"

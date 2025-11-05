@@ -40,6 +40,8 @@
 	import { list } from '@/api/transactions/list';
 	import { pushState } from '$app/navigation';
 	import { page } from '$app/state';
+	import { getLocale } from '$lib/paraglide/runtime';
+	import { m } from '$lib/paraglide/messages';
 
 	type DataTableProps<TData, TValue> = {
 		columns: ColumnDef<TData, TValue>[];
@@ -129,7 +131,17 @@
 		}
 	});
 
-	const df = new DateFormatter('en-US', {
+	function getDateFormatterLocale() {
+		const locale = getLocale();
+
+		if (locale === 'en') {
+			return 'en-US';
+		}
+
+		return locale;
+	}
+
+	const df = new DateFormatter(getDateFormatterLocale(), {
 		dateStyle: 'medium'
 	});
 
@@ -251,6 +263,13 @@
 
 	let prevCalendarStartDate = $state('');
 	let prevCalendarEndDate = $state('');
+
+	function getColumnLabel(input: string) {
+		const formated = input.replace(' ', '_').toLowerCase();
+
+		// @ts-ignore
+		return m[`transactions_column_${formated}`]();
+	}
 </script>
 
 <div>
@@ -313,6 +332,7 @@
 			<Popover.Content class="w-auto p-0" align="start">
 				<RangeCalendar
 					bind:value
+					locale={getLocale()}
 					onStartValueChange={(v) => {
 						startValue = v;
 					}}
@@ -323,7 +343,7 @@
 
 		<Input
 			disabled
-			placeholder="Search by description..."
+			placeholder={m.transactions_filter_description()}
 			value={(table.getColumn('description')?.getFilterValue() as string) ?? ''}
 			onchange={(e) => {
 				table.getColumn('description')?.setFilterValue(e.currentTarget.value);
@@ -343,10 +363,13 @@
 				<DropdownMenu.Trigger>
 					{#snippet child({ props })}
 						<Button {...props} variant="outline" class="md:ml-auto"
-							><CirclePlus />Type
+							><CirclePlus />{m.transactions_filter_type()}
 							{#if columnTypeSelection}
 								<Separator orientation="vertical" />
-								<Badge variant="outline">{columnTypeSelection}</Badge>
+								<Badge variant="outline"
+									>{// @ts-ignore
+									m[`transactions_filter_type_${columnTypeSelection}`]()}</Badge
+								>
 							{/if}
 						</Button>
 					{/snippet}
@@ -371,7 +394,8 @@
 								}
 							}
 						>
-							{type}
+							{// @ts-ignore
+							m[`transactions_filter_type_${type}`]()}
 						</DropdownMenu.CheckboxItem>
 					{/each}
 					{#if columnTypeSelection}
@@ -384,7 +408,7 @@
 								deleteURLSearchParams('type');
 							}}
 						>
-							Clear Filter
+							{m.button_clear_filter()}
 						</DropdownMenu.Item>
 					{/if}
 				</DropdownMenu.Content>
@@ -394,7 +418,7 @@
 				<DropdownMenu.Trigger>
 					{#snippet child({ props })}
 						<Button {...props} variant="outline" class="md:ml-auto"
-							><CirclePlus />Categories
+							><CirclePlus />{m.transactions_filter_categories()}
 
 							{#if categorySelection.length && categorySelection.length <= setMaxCategorySelection()}
 								<Separator orientation="vertical" />
@@ -407,7 +431,7 @@
 								{/each}
 							{:else if categorySelection.length > setMaxCategorySelection()}
 								<Separator orientation="vertical" />
-								<Badge variant="outline">{categorySelection.length} selected</Badge>
+								<Badge variant="outline">{categorySelection.length} {m.label_selected()}</Badge>
 							{/if}
 						</Button>
 					{/snippet}
@@ -449,7 +473,7 @@
 								deleteURLSearchParams('categories');
 							}}
 						>
-							Clear Filter
+							{m.button_clear_filter()}
 						</DropdownMenu.Item>
 					{/if}
 				</DropdownMenu.Content>
@@ -467,7 +491,7 @@
 						deleteURLSearchParams();
 					}}
 				>
-					Clear
+					{m.button_clear()}
 					<X />
 				</Button>
 			{/if}
@@ -477,18 +501,20 @@
 			<DropdownMenu.Root>
 				<DropdownMenu.Trigger>
 					{#snippet child({ props })}
-						<Button {...props} variant="outline" class="ml-auto"><Settings2 /> Columns</Button>
+						<Button {...props} variant="outline" class="ml-auto"
+							><Settings2 /> {m.transactions_filter_columns()}</Button
+						>
 					{/snippet}
 				</DropdownMenu.Trigger>
 				<DropdownMenu.Content align="end">
-					<p class="px-2 py-1 text-center text-sm font-medium">Toggle Columns</p>
+					<p class="px-2 py-1 text-center text-sm font-medium">{m.transactions_toggle_columns()}</p>
 					<Separator />
 					{#each table.getAllColumns().filter((col) => col.getCanHide()) as column (column.id)}
 						<DropdownMenu.CheckboxItem
 							class="capitalize"
 							bind:checked={() => column.getIsVisible(), (v) => column.toggleVisibility(!!v)}
 						>
-							{column.id}
+							{getColumnLabel(column.id)}
 						</DropdownMenu.CheckboxItem>
 					{/each}
 				</DropdownMenu.Content>
@@ -498,7 +524,7 @@
 
 	{#if hasError}
 		<div class="my-4 rounded-md border bg-red-50 p-4">
-			<p class="text-sm text-red-700">Error loading transactions. Please try again later.</p>
+			<p class="text-sm text-red-700">{m.transactions_loading_error()}</p>
 		</div>
 	{:else if loading}
 		<!-- Skeleton for Mobile View -->
@@ -623,7 +649,7 @@
 				</Card>
 			{:else}
 				<Card class="border border-border bg-card p-4 text-center text-sm text-muted-foreground">
-					No results.
+					{m.transactions_no_results()}
 				</Card>
 			{/each}
 		</div>
@@ -658,7 +684,9 @@
 						</Table.Row>
 					{:else}
 						<Table.Row>
-							<Table.Cell colspan={columns.length} class="h-24 text-center">No results.</Table.Cell>
+							<Table.Cell colspan={columns.length} class="h-24 text-center"
+								>{m.transactions_no_results()}</Table.Cell
+							>
 						</Table.Row>
 					{/each}
 				</Table.Body>
@@ -669,8 +697,10 @@
 				class="flex flex-1 flex-col gap-2 text-sm text-muted-foreground md:flex-row md:items-center"
 			>
 				<div>
-					{table.getFilteredSelectedRowModel().rows.length} of{' '}
-					{table.getFilteredRowModel().rows.length} row(s) selected.
+					{table.getFilteredSelectedRowModel().rows.length}
+					{m.label_of()}{' '}
+					{table.getFilteredRowModel().rows.length}
+					{m.transactions_rows_selected()}
 				</div>
 
 				<!--@todo: implement delete functionality-->
@@ -684,7 +714,7 @@
 				onclick={() => table.previousPage()}
 				disabled={!table.getCanPreviousPage()}
 			>
-				Previous
+				{m.button_previous()}
 			</Button>
 			<Button
 				variant="outline"
@@ -692,7 +722,7 @@
 				onclick={() => table.nextPage()}
 				disabled={!table.getCanNextPage()}
 			>
-				Next
+				{m.button_next()}
 			</Button>
 		</div>
 	{/if}

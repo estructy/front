@@ -7,6 +7,7 @@ import DataTableActions from './data-table-actions.svelte';
 import Checkbox from './data-table-checkbox.svelte';
 import type { Transaction } from '@/api/@types/transaction';
 import { createRawSnippet } from 'svelte';
+import { m } from '$lib/paraglide/messages';
 
 export const columns: ColumnDef<Transaction>[] = [
 	{
@@ -29,21 +30,25 @@ export const columns: ColumnDef<Transaction>[] = [
 	},
 	{
 		accessorKey: 'transaction_code',
-		header: 'Transaction Code',
+		header: m.transactions_column_transaction_code(),
 		id: 'transaction code'
 	},
 	{
 		accessorKey: 'date',
-		header: 'Date'
+		header: m.transactions_column_date()
 	},
 	{
 		accessorKey: 'category.type',
-		header: 'Type',
+		header: m.transactions_column_type(),
+		cell: ({ row }) => {
+			// @ts-expect-error @ts-ignore
+			return m[`transactions_filter_type_${row.original.category.type}`]();
+		},
 		id: 'type'
 	},
 	{
 		accessorKey: 'category.name',
-		header: 'Category',
+		header: m.transactions_column_category(),
 		id: 'category',
 		filterFn: (row, id, value: string[]) => {
 			return value.includes(row.getValue(id));
@@ -68,7 +73,7 @@ export const columns: ColumnDef<Transaction>[] = [
 		accessorKey: 'amount',
 		header: () => {
 			const amountHeaderSnippet = createRawSnippet(() => ({
-				render: () => `<div class="text-right">Amount</div>`
+				render: () => `<div class="text-right">${m.transactions_column_amount()}</div>`
 			}));
 			return renderSnippet(amountHeaderSnippet, '');
 		},

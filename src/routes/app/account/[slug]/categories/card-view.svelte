@@ -4,6 +4,7 @@
 	import { Button } from '$lib/components/ui/button/index.js';
 	import Circle from '@lucide/svelte/icons/circle';
 	import { replaceParams, routes, withQuery } from '@/routes';
+	import { m } from '$lib/paraglide/messages';
 
 	interface Props {
 		type: 'income' | 'expense';
@@ -22,7 +23,7 @@
 				size="sm"
 				href={withQuery(replaceParams(routes.newCategory, { accountId: accountId }), { type })}
 			>
-				New Category
+				{m.categories_new_category()}
 			</Button>
 		</Card.Content>
 	</Card.Root>
@@ -52,7 +53,7 @@
 					)}
 					class="w-full"
 				>
-					View transactions
+					{m.categories_view_transactions()}
 				</Button>
 			</Card.Footer>
 		</Card.Root>

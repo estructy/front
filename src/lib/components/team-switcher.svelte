@@ -6,6 +6,7 @@
 	import PlusIcon from '@lucide/svelte/icons/plus';
 	import type { AppAccount } from '../../@types/global';
 	import GalleryVerticalEndIcon from '@lucide/svelte/icons/gallery-vertical-end';
+	import { m } from '$lib/paraglide/messages';
 
 	// This should be `Component` after @lucide/svelte updates types
 	// eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -53,7 +54,9 @@
 				side={sidebar.isMobile ? 'bottom' : 'right'}
 				sideOffset={4}
 			>
-				<DropdownMenu.Label class="text-xs text-muted-foreground">Accounts</DropdownMenu.Label>
+				<DropdownMenu.Label class="text-xs text-muted-foreground"
+					>{m.team_switch_accounts()}</DropdownMenu.Label
+				>
 				{#each account.accounts as acc, index (acc.accountName)}
 					<DropdownMenu.Item onSelect={() => (activeTeam = acc)} class="gap-2 p-2">
 						<div class="flex size-6 items-center justify-center rounded-md border">

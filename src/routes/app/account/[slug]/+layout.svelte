@@ -14,6 +14,7 @@
 	import { replaceParams, routes } from '@/routes.js';
 	import Separator from '@/components/ui/separator/separator.svelte';
 	import { page } from '$app/state';
+	import { m } from '$lib/paraglide/messages';
 
 	let { children, data } = $props();
 
@@ -32,7 +33,16 @@
 		);
 		const segments = path.split('/').filter(Boolean);
 
-		return segments.map((part, index) => {
+		const translatedSegments = segments.map((segment) => {
+			try {
+				// @ts-ignore
+				return m[`app_${segment}`]();
+			} catch (e) {
+				return segment;
+			}
+		});
+
+		return translatedSegments.map((part, index) => {
 			return {
 				name: part.charAt(0).toUpperCase() + part.slice(1),
 				href: `/app/account/${data?.account.currentAccountId ?? ''}/${segments.slice(0, index + 1).join('/')}`
@@ -78,7 +88,8 @@
 					size="sm"
 					onclick={newTransaction}
 				>
-					<Plus /> New Transaction
+					<Plus />
+					{m.app_new_transaction()}
 				</Button>
 			</div>
 		</header>

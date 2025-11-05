@@ -17,6 +17,7 @@
 	import type { ComponentProps } from 'svelte';
 	import { replaceParams, routes } from '@/routes';
 	import { type AppAccount, type AppUser } from '../../@types/global';
+	import { m } from '$lib/paraglide/messages';
 
 	let {
 		ref = $bindable(null),
@@ -143,19 +144,19 @@
 		],
 		projects: [
 			{
-				name: 'Dashboard',
+				name: m.app_dashboard(),
 				url: replaceParams(routes.dashboard, account),
 				icon: HouseIcon,
 				slug: 'dashboard'
 			},
 			{
-				name: 'Transactions',
+				name: m.app_transactions(),
 				url: replaceParams(routes.transactions, account),
 				icon: CoinsIcon,
 				slug: 'transactions'
 			},
 			{
-				name: 'Categories',
+				name: m.app_categories(),
 				url: replaceParams(routes.categories, account),
 				icon: NotebookTextIcon,
 				slug: 'categories'

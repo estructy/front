@@ -1,6 +1,7 @@
 <script lang="ts">
 	import * as Tabs from '$lib/components/ui/tabs/index.js';
 	import CardView from './card-view.svelte';
+	import { m } from '$lib/paraglide/messages';
 
 	let { data } = $props();
 
@@ -12,8 +13,8 @@
 	<div class="w-full max-w-2xl rounded-lg">
 		<Tabs.Root value="expense">
 			<Tabs.List class="mb-4 grid w-full grid-cols-2">
-				<Tabs.Trigger value="expense">Expense</Tabs.Trigger>
-				<Tabs.Trigger value="income">Income</Tabs.Trigger>
+				<Tabs.Trigger value="expense">{m.categories_expenses()}</Tabs.Trigger>
+				<Tabs.Trigger value="income">{m.categories_income()}</Tabs.Trigger>
 			</Tabs.List>
 			<Tabs.Content value="expense">
 				<CardView

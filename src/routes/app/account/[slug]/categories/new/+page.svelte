@@ -11,16 +11,17 @@
 	import * as Form from '$lib/components/ui/form/index.js';
 	import { browser } from '$app/environment';
 	import { replaceParams, routes } from '@/routes.js';
+	import { m } from '$lib/paraglide/messages';
 
 	let { data } = $props();
 
-	let submitText = $state('Create Category');
+	let submitText = $state(m.categories_create_category_button());
 
 	const form = superForm(data.form, {
 		validators: zodClient(createCategorySchema),
 		validationMethod: 'onsubmit',
 		onSubmit: () => {
-			submitText = 'Creating...';
+			submitText = m.label_creating();
 		},
 		onResult: async (event) => {
 			switch (event.result.type) {
@@ -31,13 +32,13 @@
 								`/${redirectValue}`
 						);
 					}
-					submitText = 'Created!';
+					submitText = m.label_created();
 					setTimeout(() => {
-						submitText = 'Create Category';
+						submitText = m.categories_create_category_button();
 					}, 2000);
 					break;
 				case 'failure':
-					submitText = 'Try Again';
+					submitText = m.button_try_again();
 					break;
 			}
 		}
@@ -48,9 +49,11 @@
 	let filterdCategories = $derived(data.categories.filter((c) => c.type === $formData.type));
 	let triggerContent = $derived(
 		data.categories.find((c) => c.category_code === $formData.parent_code)?.name ||
-			'Select a parent category'
+			m.categories_form_parent_category_placeholder()
 	);
-	let typeTriggerContent = $derived($formData.type === 'expense' ? 'Expense' : 'Income');
+	let typeTriggerContent = $derived(
+		$formData.type === 'expense' ? m.categories_expenses() : m.categories_income()
+	);
 
 	function handleGoBack() {
 		if (redirectValue) {
@@ -81,14 +84,20 @@
 
 <div class="flex w-full flex-row justify-center p-4">
 	<div class="w-full max-w-2xl rounded-lg">
-		<h1 class="mb-6 text-2xl font-semibold text-gray-900">New Category</h1>
+		<h1 class="mb-6 text-2xl font-semibold text-gray-900">{m.categories_new_category()}</h1>
 
 		<form method="POST" class="grid gap-4" use:enhance>
 			<Form.Field {form} name="name">
 				<Form.Control>
 					{#snippet children({ props })}
-						<Form.Label>Name <span class="text-red-500">*</span></Form.Label>
-						<Input {...props} bind:value={$formData.name} placeholder="Food" />
+						<Form.Label>{m.form_name_label()} <span class="text-red-500">*</span></Form.Label>
+						<Input
+							{...props}
+							bind:value={$formData.name}
+							placeholder={$formData.type === 'income'
+								? m.categories_form_name_income_placeholder()
+								: m.categories_form_name_expenses_placeholder()}
+						/>
 					{/snippet}
 				</Form.Control>
 				<Form.FieldErrors />
@@ -97,7 +106,7 @@
 			<Form.Field {form} name="color">
 				<Form.Control>
 					{#snippet children({ props })}
-						<Form.Label>Color <span class="text-red-500">*</span></Form.Label>
+						<Form.Label>{m.form_color_label()} <span class="text-red-500">*</span></Form.Label>
 						<Input {...props} bind:value={$formData.color} type="color" />
 					{/snippet}
 				</Form.Control>
@@ -107,14 +116,14 @@
 			<Form.Field {form} name="type">
 				<Form.Control>
 					{#snippet children({ props })}
-						<Form.Label>Type <span class="text-red-500">*</span></Form.Label>
+						<Form.Label>{m.form_type_label()} <span class="text-red-500">*</span></Form.Label>
 						<Select.Root {...props} type="single" name="type" bind:value={$formData.type}>
 							<Select.Trigger class="w-full">
 								{typeTriggerContent}
 							</Select.Trigger>
 							<Select.Content>
-								<Select.Item value="expense">Expense</Select.Item>
-								<Select.Item value="income">Income</Select.Item>
+								<Select.Item value="expense">{m.categories_expenses()}</Select.Item>
+								<Select.Item value="income">{m.categories_income()}</Select.Item>
 							</Select.Content>
 						</Select.Root>
 					{/snippet}
@@ -125,7 +134,7 @@
 			<Form.Field {form} name="parent_code">
 				<Form.Control>
 					{#snippet children({ props })}
-						<Form.Label>Parent Category</Form.Label>
+						<Form.Label>{m.categories_form_parent_category()}</Form.Label>
 						<Select.Root
 							{...props}
 							type="single"
@@ -160,7 +169,7 @@
 					onclick={handleGoBack}
 					type="button"
 					class="bg-gray-200 text-gray-800 hover:bg-gray-300 focus-visible:outline-gray-400"
-					>Go Back</Button
+					>{m.button_go_back()}</Button
 				>
 				<Form.Button
 					type="submit"
@@ -175,7 +184,7 @@
 		{#if redirectValue}
 			<Separator class="my-8" />
 			<p class="text-center text-sm text-muted-foreground">
-				After creating the category, you will be redirected to the new transaction page.
+				{m.categories_redirect_message()}
 			</p>
 		{/if}
 	</div>
